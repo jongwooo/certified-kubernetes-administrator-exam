@@ -90,3 +90,39 @@ kubectl get pods -n kube-system
 
 ### ETCD in HA Environment
 - `etcd.service` 필드의 `--initial-cluster` 항목에 etcd server의 경로를 입력한다.
+
+## Kube API Server
+- `kubectl` 명령어를 실행하면 기본적으로 kube-apiserver로 요청이 전달된다.
+- 또는 `kubectl` 대신 API를 직접 호출할 수 도 있다.
+
+![Kube API Server](./kube-apiserver.png)
+
+1. Authenticate User
+2. Validate Request
+3. Retrieve data
+4. Update ETCD
+5. Scheduler
+6. Kubelet
+
+- 다른 형태의 요청도 대부분 위와 같은 절차를 거쳐 이루어진다.
+- 즉, 쿠버네티스에서 리소스와 오브젝트를 관리하는 주체는 kube-apiserver이다.
+- etcd에 유일하게 직접 접근할 수 있다.
+	- 쿠버네티스의 다른 오브젝트/리소스는 kube-apiserver를 통해 etcd에 접근해야 한다.
+
+### kubeadm을 사용할 경우
+- kubeadm을 사용할 경우 kube-apiserver를 직접 설치할 필요는 없지만, 바이너리 형태로 직접 설치할 수도 있다.
+- kubeadm으로 설치했다면, 마스터 노드의 kube-system 네임스페이스에 kube-apiserver-master라는 이름의 파드가 생성된다.
+
+### Kube API Server Options
+- 파드를 정의한 yaml 파일은 아래 경로를 통해 확인할 수 있다.
+	```bash
+	cat /etc/kubernetes/manifests/kube-apiserver.yaml
+	```
+- kube-apiserver의 옵션은 아래 경로를 통해 확인할 수 있다.
+	```bash
+	cat /etc/systemd/system/kube-apiserver.service
+	```
+- 마스터 노드에서 실행 중인 프로세스 중 kube-apiserver에서 실행되는 것들은 아래 명령어로 확인할 수 있다.
+	```bash
+	ps -aux | grep kube-apiserver
+	```
