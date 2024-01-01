@@ -173,3 +173,31 @@ wget https://storage.googleapis.com/kubernetes-release/release/v1.13.0/bin/linu
 	```bash
 	ps -aux | grep kube-controller-manager
 	```
+
+## Kube Scheduler
+- 어떤 파드가 어떤 노드에 위치할 것인가를 결정한다.
+- 실제로 파드를 배치하지는 않는다.
+- Filter Nodes/Rank Nodes 작업을 통해 파드를 설치할 수 있는 최적의 노드를 선정한다.
+
+![Kube Scheduler](./kube-scheduler.png)
+
+- 예시 그림의 CPU 요구량은 10이므로 CPU 4인 노드는 대상에서 제외된다.
+- CPU를 할당한 후 남은 리소스가 많을 수록 가중치가 높다.
+- 예시의 경우 CPU 16개가 있는 노드의 가중치가 더 높기 때문에 선택된다.
+- High Level에서는 위와 같은 방식으로 작동하며, 사용자의 구성에 따라 값이 변할 수 있다.
+
+### Kube Scheduler 설치하기
+```bash
+wget https://storage.googleapis.com/kubernetes-release/release/v1.13.0/bin/linux/amd64/kube-scheduler
+```
+
+### Kube Scheduler Options
+ - kubeadm으로 설치했다면, 파드를 정의한 yaml 파일은 아래 경로를 통해 확인할 수 있다.
+	```bash
+	cat /etc/kubernetes/manifests/kube-scheduler.yaml
+	```
+
+- 현재 실행 중인 kube-scheduler 프로세스는 아래 명령어로 확인할 수 있다.
+	```bash
+	ps -aux | grep kube-scheduler
+	```
