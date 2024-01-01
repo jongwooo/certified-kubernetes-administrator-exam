@@ -126,3 +126,50 @@ kubectl get pods -n kube-system
 	```bash
 	ps -aux | grep kube-apiserver
 	```
+
+## Kube Controller Manager
+- 쿠버네티스의 다양한 컨트롤러를 관리한다.
+- 컨트롤러는 지속적으로 시스템 내 다양한 구성 요소의 상태를 모니터링하고, 시스템 전체를 원하는 기능 상태로 만든다.
+
+### 노드 컨트롤러
+
+![Node-Controller](./node-controller.png)
+
+- 노드 컨트롤러는 kube-apiserver를 통해 노드의 상태를 모니터링하고 애플리케이션이 계속 실행되도록 필요한 행동을 한다.
+
+### 레플리케이션 컨트롤러
+
+![Replication-Controller](./replication-controller.png)
+
+- 레플리케이션 컨트롤러는 레플리카셋의 상태를 모니터링하고 원하는 수의 파드가 항상 사용 가능하도록 한다.
+- 파드가 죽으면 재생성한다.
+
+### 쿠버네티스의 다양한 컨트롤러
+
+![Kube Controllers](./kube-controllers.png)
+
+- 쿠버네티스에서는 오브젝트를 관리하기 위해 여러 종류의 컨트롤러를 사용한다.
+- 다양한 컨트롤러들은 kube-controller-manager라는 단일 프로세스로 관리된다.
+- 즉, kube-controller-manager를 설치하면 다른 컨트롤러도 설치된다.
+
+### Kube Controller Manager 설치하기
+```bash
+wget https://storage.googleapis.com/kubernetes-release/release/v1.13.0/bin/linux/amd64/kube-controller-manager
+```
+- `--controllers` 옵션으로 컨트롤러를 활성화할지 지정할 수 있다.
+	- 기본값으로 설정하면 모든 종류의 컨트롤러를 전부 활성화된다.
+	- 컨트롤러가 작동하지 않거나 존재하지 않을 경우, 해당 옵션을 살펴보면 된다.
+
+### Kube Controller Manager Options
+ - kubeadm으로 설치했다면, 파드를 정의한 yaml 파일은 아래 경로를 통해 확인할 수 있다.
+	```bash
+	cat /etc/kubernetes/manifests/kube-controller-manager.yaml
+	```
+- kubeadm 없이 직접 설치했다면, kube-controller-manager의 옵션은 아래 경로를 통해 확인할 수 있다.
+	```bash
+	cat /etc/systemd/system/kube-controller-manager.service
+	```
+- 현재 실행 중인 kube-controller-manager 프로세스는 아래 명령어로 확인할 수 있다.
+	```bash
+	ps -aux | grep kube-controller-manager
+	```
