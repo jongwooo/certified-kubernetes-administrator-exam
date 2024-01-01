@@ -201,3 +201,24 @@ wget https://storage.googleapis.com/kubernetes-release/release/v1.13.0/bin/linu
 	```bash
 	ps -aux | grep kube-scheduler
 	```
+
+## Kubelet
+- 마스터 노드의 kube-scheduler의 지시에 따라, 컨테이너를 load/unload한다.
+
+![Kubelet](./kubelet.png)
+
+- 자신이 실행되고 있는 노드를 클러스터에 등록한다.
+- kube-apiserver로부터 노드에 컨테이너나 파드를 load하라는 지시를 받으면, 컨테이너 런타임 엔진에 이미지 실행을 요청한다.
+- 파드와 컨테이너의 상태를 지속적으로 모니터링하고, 이를 kube-apiserver에 주기적으로 전달한다.
+
+### Kubelet 설치하기
+```bash
+wget https://storage.googleapis.com/kubernetes-release/release/v1.13.0/bin/linux/amd64/kubelet
+```
+- kubeadm으로 설치할 수 없고,  워커 노드에 항상 수동으로 설치해야 한다.
+
+### Kubelet Options
+- 현재 실행 중인 kubelet 프로세스는 아래 명령어로 확인할 수 있다.
+	```bash
+	ps -aux | grep kubelet
+	```
