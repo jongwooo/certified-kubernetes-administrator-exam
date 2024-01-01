@@ -46,3 +46,47 @@
 	- 주기적으로 kube-apiserver에서 노드와 컨테이너 상태를 모니터링하기 위해 상태 보고서를 가져온다.
 - **kube-proxy**: 실행 중인 컨테이너 애플리케이션 간 통신을 담당한다.
 	- 각 워커 노드에서 개별적으로 실행되는 서비스이다.
+
+## ETCD in Kubernetes
+### What is ETCD?
+> A distributed, reliable key-value store that is simple, secure and fast.
+
+![ETCD in Kubernetes](./etcd-in-kubernetes.png)
+
+- etcd 클러스터에 노드, 파드, 컨피그, 시크릿, 어카운트 등의 쿠버네티스 오브젝트 정보를 저장한다.
+	- 값이 정상적으로 저장되거나 변경되면 task가 완전히 complete된 것으로 간주한다.
+- `kubectl get` 명령어를 사용했을 때 etcd에 저장된 값을 리턴한다.
+### key-value store
+- 일반적인 테이블 형태로 저장하는 대신, configuration처럼 적은 용량을 빠르게 읽고 쓰기 위해 사용한다.
+
+### ETCD 실행하기
+```bash
+./etcd
+```
+- 로컬에서 실행할 경우, 2379번 포트를 사용한다.
+
+### 직접 설치할 경우
+```bash
+wget -q --https-only \
+"https://github.com/coreos/etcd/releases/download/v3.3.9/etcd-v3.3.9-linux-amd64.tar.gz"
+```
+- `--advertise-client-urls` 옵션은 kube-apiserver에서 etcd 클러스터에 접근하기 위해 설정해주어야 하는 필드이다.
+
+### kubeadm으로 설치할 경우
+```bash
+kubectl get pods -n kube-system
+```
+- kube-system이라는 네임스페이스에 파드 형태로 etcd server가 생성된다.
+- 파드 내부의 컨테이너에서 `etcdctl` 명령어로 리소스 접근이 가능하다.
+
+### Explore ETCD
+- 파드 내부 디렉토리를 확인해보면 레지스트리 하위 경로에 여러 쿠버네티스 구성 요소가 존재한다.
+	- minions
+	- pods
+	- replicasets
+	- deployments
+	- roles
+	- secrets
+
+### ETCD in HA Environment
+- `etcd.service` 필드의 `--initial-cluster` 항목에 etcd server의 경로를 입력한다.
