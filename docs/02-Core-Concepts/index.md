@@ -221,3 +221,31 @@ wget https://storage.googleapis.com/kubernetes-release/release/v1.27.0/bin/linu
 	```bash
 	ps -aux | grep kubelet
 	```
+
+## Kube Proxy
+- 기본적으로 같은 클러스터에 배포된 파드끼리는 통신이 자유롭다.
+- 파드 네트워크는 모든 파드가 통신할 수 있도록 클러스터의 모든 노드에 생성되는 가상 네트워크이다.
+
+![Kube Proxy](./kube-proxy.png)
+
+- 특정 파드에서 다른 파드에 접근하기 위한 최적의 방법은 서비스를 이용하는 것이다.
+- 예를 들어 데이터베이스가 실행 중인 파드의 IP 주소가 생성되지만, 이 주소는 가변적이다.
+	- 파드의 재배포 등의 이슈로 IP 주소가 변경될 수 있다.
+- 웹 애플리케이션은 이름이 DB인 서비스를 찾아 데이터베이스에 액세스할 수 있다.
+- 서비스는 별도의 IP 주소를 가지고 있으며, 서비스는 백엔드 파드로 트래픽을 포워딩하는 역할을 한다.
+- 서비스는 실제 오브젝트가 아니고, 쿠버네티스 메모리에 존재하는 가상 구성 요소이다.
+	- 파드나 컨테이너 개념이 아니므로, 파드 네트워크에 접근하는 방식으로 포워딩하지 않는다.
+- 서비스가 여러 노드의 각 파드에 접근할 수 있는 이유는 kube-proxy의 존재 때문이다.
+- kube-proxy는 쿠버네티스 클러스터의 각 노드에서 실행되는 프로세스이다.
+- 서비스를 탐지하고, 새로운 서비스가 등장할 경우 규칙(e.g. iptable)을 설정하여 트래픽 포워딩을 가능하게 한다.
+
+### Kube Proxy 설치하기
+```bash
+wget https://storage.googleapis.com/kubernetes-release/release/v1.27.0/bin/linux/amd64/kube-proxy
+```
+
+### Kubeadm을 사용할 경우
+- kubeadm은 각 노드에 kube-proxy 파드를 배포하며, 데몬셋으로 배포된다.
+	```bash
+	kubectl get demonset -n kube-system
+	```
