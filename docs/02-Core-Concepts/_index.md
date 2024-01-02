@@ -266,3 +266,28 @@ wget https://storage.googleapis.com/kubernetes-release/release/v1.27.0/bin/linu
 - 일반적으로 파드와 컨테이너는 1:1 관계를 유지하며, 스케일링을 위해 컨테이너가 아닌 파드의 개수를 조절한다.
 - 파드 하나에 여러 개의 컨테이너를 생성하는 경우는 보통 애플리케이션의 모니터링이나 health check 기능을 적용하기 위해서다.
 - 동일한 네트워크를 공유하므로 두 컨테이너는 로컬호스트로 통신이 가능하며, 같은 저장 공간을 사용할 수 있다.
+
+## Pods with YAML
+- 쿠버네티스에서는 파드, 레플리카셋, 디플로이먼트, 서비스 등의 생성을 위한 입력으로 yaml 파일을 사용한다.
+- 쿠버네티스의 모든 오브젝트는 기본적으로 4개의 필드를 포함한다.
+	```yaml
+	apiVersion: v1
+	kind: Pod
+	metadata:
+		name: myapp-pod
+		labels:
+			app: myapp
+			type: front-end
+	spec:
+		containers:
+			- name: nginx-container
+			  image: nginx
+	```
+	- **apiVersion**: 오브젝트를 생성할 때 사용하는 쿠버네티스 API 버전이다. 생성하려는 것에 따라 올바른 API 버전을 사용해야 한다.
+	- **kind**: 어떤 종류의 오브젝트를 생성할 것인지 명시한다.
+	- **metadata**: 오브젝트를 설명하는 기본적인 데이터로, name이나 labels 등 키-값 형식으로 데이터를 정의한다.
+		- name과 labels는 동일한 line에 있어야 한다. 서로는 siblings 관계이고, metadata의 children 관계이다.
+		- 쿠버네티스에서 metadata 필드는 쿠버네티스 API에 정의된 필드만 사용할 수 있다.
+		- 대신, labels 필드에서는 어떤 값이든 키-값 형태로 정의하여 사용할 수 있다.
+	- **spec**: 생성하려는 오브젝트와 관련된 추가 정보를 명시한다.
+- `kubectl create -f pod-definition.yaml` 명령어로 파드를 생성할 수 있다.
