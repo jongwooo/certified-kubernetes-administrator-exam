@@ -68,7 +68,7 @@
 ### 직접 설치할 경우
 ```bash
 wget -q --https-only \
-"https://github.com/coreos/etcd/releases/download/v3.3.9/etcd-v3.3.9-linux-amd64.tar.gz"
+"https://github.com/etcd-io/etcd/releases/download/v3.5.11/etcd-v3.5.11-linux-amd64.tar.gz"
 ```
 - `--advertise-client-urls` 옵션은 kube-apiserver에서 etcd 클러스터에 접근하기 위해 설정해주어야 하는 필드이다.
 
@@ -114,11 +114,11 @@ kubectl get pods -n kube-system
 - kubeadm으로 설치했다면, 마스터 노드의 kube-system 네임스페이스에 kube-apiserver-master라는 이름의 파드가 생성된다.
 
 ### Kube API Server Options
-- 파드를 정의한 yaml 파일은 아래 경로를 통해 확인할 수 있다.
+- kubeadm으로 설치했다면, 파드를 정의한 yaml 파일은 아래 경로를 통해 확인할 수 있다.
 	```bash
 	cat /etc/kubernetes/manifests/kube-apiserver.yaml
 	```
-- kube-apiserver의 옵션은 아래 경로를 통해 확인할 수 있다.
+- kubeadm 없이 직접 설치했다면, kube-apiserver의 옵션은 아래 경로를 통해 확인할 수 있다.
 	```bash
 	cat /etc/systemd/system/kube-apiserver.service
 	```
@@ -154,7 +154,7 @@ kubectl get pods -n kube-system
 
 ### Kube Controller Manager 설치하기
 ```bash
-wget https://storage.googleapis.com/kubernetes-release/release/v1.13.0/bin/linux/amd64/kube-controller-manager
+wget https://storage.googleapis.com/kubernetes-release/release/v1.27.0/bin/linux/amd64/kube-controller-manager
 ```
 - `--controllers` 옵션으로 컨트롤러를 활성화할지 지정할 수 있다.
 	- 기본값으로 설정하면 모든 종류의 컨트롤러를 전부 활성화된다.
@@ -188,7 +188,7 @@ wget https://storage.googleapis.com/kubernetes-release/release/v1.13.0/bin/linu
 
 ### Kube Scheduler 설치하기
 ```bash
-wget https://storage.googleapis.com/kubernetes-release/release/v1.13.0/bin/linux/amd64/kube-scheduler
+wget https://storage.googleapis.com/kubernetes-release/release/v1.27.0/bin/linux/amd64/kube-scheduler
 ```
 
 ### Kube Scheduler Options
@@ -196,7 +196,6 @@ wget https://storage.googleapis.com/kubernetes-release/release/v1.13.0/bin/linu
 	```bash
 	cat /etc/kubernetes/manifests/kube-scheduler.yaml
 	```
-
 - 현재 실행 중인 kube-scheduler 프로세스는 아래 명령어로 확인할 수 있다.
 	```bash
 	ps -aux | grep kube-scheduler
@@ -213,7 +212,7 @@ wget https://storage.googleapis.com/kubernetes-release/release/v1.13.0/bin/linu
 
 ### Kubelet 설치하기
 ```bash
-wget https://storage.googleapis.com/kubernetes-release/release/v1.13.0/bin/linux/amd64/kubelet
+wget https://storage.googleapis.com/kubernetes-release/release/v1.27.0/bin/linux/amd64/kubelet
 ```
 - kubeadm으로 설치할 수 없고,  워커 노드에 항상 수동으로 설치해야 한다.
 
