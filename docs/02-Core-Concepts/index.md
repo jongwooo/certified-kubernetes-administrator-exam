@@ -249,3 +249,20 @@ wget https://storage.googleapis.com/kubernetes-release/release/v1.27.0/bin/linu
 	```bash
 	kubectl get demonset -n kube-system
 	```
+
+## Pods
+- 쿠버네티스는 컨테이너를 직접적으로 워커 노드에 배포하지 않는다.
+- 컨테이너는 파드라는 오브젝트로 캡슐화되며, 파드는 쿠버네티스에서 가장 작은 오브젝트이다.
+
+![Pod Scale up](./pod-scale-up.png)
+
+- 트래픽이 증가해 Scale-up을 할 경우, 같은 파드 내 새로운 컨테이너가 생성되는 것이 아니라 새로운 파드가 생성된다.
+- 현재 노드가 충분한 용량을 확보하지 못할 경우, 새로운 노드에 파드가 추가된다.
+
+### Multi-Container Pods
+
+![Multi-Container Pods](./multi-container-pods.png)
+
+- 일반적으로 파드와 컨테이너는 1:1 관계를 유지하며, 스케일링을 위해 컨테이너가 아닌 파드의 개수를 조절한다.
+- 파드 하나에 여러 개의 컨테이너를 생성하는 경우는 보통 애플리케이션의 모니터링이나 health check 기능을 적용하기 위해서다.
+- 동일한 네트워크를 공유하므로 두 컨테이너는 로컬호스트로 통신이 가능하며, 같은 저장 공간을 사용할 수 있다.
