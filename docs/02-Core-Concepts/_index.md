@@ -157,7 +157,7 @@ kubectl get pods -n kube-system
 wget https://storage.googleapis.com/kubernetes-release/release/v1.27.0/bin/linux/amd64/kube-controller-manager
 ```
 - `--controllers` 옵션으로 컨트롤러를 활성화할지 지정할 수 있다.
-	- 기본값으로 설정하면 모든 종류의 컨트롤러를 전부 활성화된다.
+	- 기본값으로 설정하면 모든 종류의 컨트롤러가 전부 활성화된다.
 	- 컨트롤러가 작동하지 않거나 존재하지 않을 경우, 해당 옵션을 살펴보면 된다.
 
 ### Kube Controller Manager Options
