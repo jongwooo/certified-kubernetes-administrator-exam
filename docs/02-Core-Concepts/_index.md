@@ -175,7 +175,7 @@ kubectl get pods -n kube-system
 ### Kube Controller Manager 설치하기
 
 ```bash
-wget https://storage.googleapis.com/kubernetes-release/release/v1.27.0/bin/linux/amd64/kube-controller-manager
+wget https://storage.googleapis.com/kubernetes-release/release/v1.27.0/bin/linux/amd64/kube-controller-manager
 ```
 
 - `--controllers` 옵션으로 컨트롤러를 활성화할지 지정할 수 있다.
@@ -213,7 +213,7 @@ wget https://storage.googleapis.com/kubernetes-release/release/v1.27.0/bin/linu
 ### Kube Scheduler 설치하기
 
 ```bash
-wget https://storage.googleapis.com/kubernetes-release/release/v1.27.0/bin/linux/amd64/kube-scheduler
+wget https://storage.googleapis.com/kubernetes-release/release/v1.27.0/bin/linux/amd64/kube-scheduler
 ```
 
 ### Kube Scheduler Options
@@ -240,7 +240,7 @@ wget https://storage.googleapis.com/kubernetes-release/release/v1.27.0/bin/linu
 ### Kubelet 설치하기
 
 ```bash
-wget https://storage.googleapis.com/kubernetes-release/release/v1.27.0/bin/linux/amd64/kubelet
+wget https://storage.googleapis.com/kubernetes-release/release/v1.27.0/bin/linux/amd64/kubelet
 ```
 
 - kubeadm으로 설치할 수 없고, 워커 노드에 항상 수동으로 설치해야 한다.
@@ -273,7 +273,7 @@ wget https://storage.googleapis.com/kubernetes-release/release/v1.27.0/bin/linu
 ### Kube Proxy 설치하기
 
 ```bash
-wget https://storage.googleapis.com/kubernetes-release/release/v1.27.0/bin/linux/amd64/kube-proxy
+wget https://storage.googleapis.com/kubernetes-release/release/v1.27.0/bin/linux/amd64/kube-proxy
 ```
 
 ### Kubeadm을 사용할 경우
