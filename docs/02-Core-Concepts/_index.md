@@ -326,3 +326,114 @@ wget https://storage.googleapis.com/kubernetes-release/release/v1.27.0/bin/linu
       - 대신, labels 필드에서는 어떤 값이든 키-값 형태로 정의하여 사용할 수 있다.
     - **spec**: 생성하려는 오브젝트와 관련된 추가 정보를 명시한다.
 - `kubectl create -f pod-definition.yaml` 명령어로 파드를 생성할 수 있다.
+
+## ReplicaSets
+
+### High Availability
+
+![High Availability](./high-availability.png)
+
+- 애플리케이션이 만약 어떤 이유로 인해서 충돌이 발생하거나 파드가 fail이 발생했다면 사용자는 애플리케이션에 접근할 수 없게 된다.
+- 이러한 일을 예방하기 위해서 동시에 여러 개의 파드를 띄운다.
+    - 파드 하나에서 문제가 발생하더라도 다른 파드로 여전히 사용자는 접근할 수 있기 때문이다.
+- 파드가 하나 뿐이어도 레플리케이션 컨트롤러는 기존의 파드가 fail이 발생해도 자동으로 새로운 파드를 띄운다.
+- 레플리케이션 컨트롤러는 특정 파드가 항상 실행되도록 보장한다.
+
+### Load Balancing & Scaling
+
+![Load Balancing & Scaling](./load-balancing-and-scaling.png)
+
+- 여러 개의 파드 간 로드밸런싱을 수행한다.
+- 파드에 들어오는 요청이 많을 경우, 추가로 파드를 생성할 수 있게 지원한다.
+- 만약 노드 리소스가 부족할 경우, 다른 노드에서 파드를 생성하고 로드밸런싱을 수행한다.
+
+### 레플리케이션 컨트롤러와 레플리카셋
+
+- 동일한 목적으로 만들어진 오브젝트이며, 레플리케이션 컨트롤러는 레플리카셋으로 대체되고 있다.
+
+**레플리케이션 컨트롤러**
+
+```yaml
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: myapp-rc
+  labels:
+    app: myapp
+    type: front-end
+spec:
+  template:
+    metadata:
+      name: myapp-pod
+      labels:
+        app: myapp
+        type: front-end
+    spec:
+      containers:
+        - name: nginx-controller
+          image: nginx
+  replicas: 3
+```
+
+- spec.template 하위 항목에 파드에서 사용하던 metadata, spec을 그대로 적용한다.
+- 몇 개의 파드를 유지할 것인지를 spec.replicas 필드에 명시한다.
+- 아래 명령어를 통해 레플리케이션 컨트롤러를 확인할 수 있다.
+  ```bash
+  kubectl get replicationcontroller
+  ```
+
+**레플리카셋**
+
+```yaml
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: myapp-replicaset
+  labels:
+    app: myapp
+    type: front-end
+spec:
+  template:
+    metadata:
+      name: myapp-pod
+      labels:
+        app: myapp
+        type: front-end
+    spec:
+      containers:
+        - name: nginx-controller
+          image: nginx
+  replicas: 3
+  selector:
+    matchLabels:
+      type: front-end
+```
+
+- apiVersion이 apps/v1으로 레플리케이션 컨트롤러와 다르다.
+- selector 필드가 required로 변경되었다.
+  - selector 필드는 레플리카셋을 생성하기 전에 만들었던 파드 중 셀렉터에 포함되는 파드까지 통제할 수 있다.
+  - matchLabels.type 형태로 레이블에 정의한 값을 선택하여 통제가 가능하다.
+- 아래 명령어를 통해 레플리카셋을 확인할 수 있다.
+  ```bash
+  kubectl get replicaset
+  ```
+
+### 레이블과 셀렉터
+
+![Labels and Selectors](./labels-and-selectors.png)
+
+- 클러스터 내 수많은 파드 중에서 레플리카셋이 모니터링하고 관리해야 할 파드를 식별하기 위해 사용한다.
+-  다른 컨트롤러에서도 비슷한 목적으로 레이블과 셀렉터를 사용한다.
+
+### Scale
+
+- 스케일링을 하는 방법은 여러 가지가 있다.
+  - yaml 파일의 replicas를 변경하고, 아래 명령을 실행한다.
+    ```bash
+    kubectl replace -f replicaset-definition.yaml
+    ```
+  - `kubectl scale` 명령어를 사용한다. 이 방식을 사용할 경우 yaml 파일의 replicas는 자동으로 업데이트되지 않는다는 점을 주의해야 한다.
+    ```bash
+    kubectl scale --replicas=6 -f replicaset-definition.yaml
+    # kubectl scale --replicas=6 -f replicaset myapp-replicaset
+    ```
