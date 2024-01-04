@@ -126,7 +126,11 @@ kubectl get pods -n kube-system
 - etcd에 유일하게 직접 접근할 수 있다.
   - 쿠버네티스의 다른 오브젝트/리소스는 kube-apiserver를 통해 etcd에 접근해야 한다.
 
-### kubeadm을 사용할 경우
+### Kube API Server 설치하기
+
+```bash
+wget https://storage.googleapis.com/kubernetes-release/release/v1.27.0/bin/linux/amd64/kube-apiserver
+```
 
 - kubeadm을 사용할 경우 kube-apiserver를 직접 설치할 필요는 없지만, 바이너리 형태로 직접 설치할 수도 있다.
 - kubeadm으로 설치했다면, 마스터 노드의 kube-system 네임스페이스에 kube-apiserver-master라는 이름의 파드가 생성된다.
@@ -161,7 +165,7 @@ kubectl get pods -n kube-system
 
 ![Replication-Controller](./replication-controller.png)
 
-- 레플리케이션 컨트롤러는 레플리카셋의 상태를 모니터링하고 원하는 수의 파드가 항상 사용 가능하도록 한다.
+- 레플리케이션 컨트롤러는 레플리카의 상태를 모니터링하고 원하는 수의 파드가 항상 사용 가능하도록 한다.
 - 파드가 죽으면 재생성한다.
 
 ### 쿠버네티스의 다양한 컨트롤러
