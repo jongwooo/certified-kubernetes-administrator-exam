@@ -482,3 +482,81 @@ spec:
   ```bash
   kubectl get deployments
   ```
+
+## Service
+
+- 서비스는 애플리케이션 안팎의 다양한 구성 요소간의 통신을 가능하게 한다.
+  - 애플리케이션을 다른 애플리케이션 또는 사용자와 연결하는 것을 돕는다.
+  - MSA에서 느슨한 결합을 가능하게 한다.
+
+### NodePort
+
+- 서비스가 노드의 포트에서 내부 파드에 접근할 수 있도록 한다.
+
+![NodePort](./nodeport.png)
+
+- targetPort: 실제 웹 서버가 동작하는 포트이다.
+- port: 서비스 자신의 포트이다.
+- nodePort: 외부에서 웹 서버에 액세스하는 데 사용하는 노드 자체의 포트이다. 30,000~32,767의 범위를 가진다.
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-service
+spec:
+  type: NodePort
+  ports:
+    - targetPort: 80
+      port: 80
+      nodePort: 30008
+  selector:
+    app: myapp
+    type: front-end
+```
+
+-  targetPort 필드는 입력하지 않을 경우 port 필드의 값과 동일하며, nodePort를 입력하지 않은 경우 범위 내에서 사용 가능한 포트가 랜덤 배정된다.
+- 어떤 파드와 연결할 것인지는 파드 레이블에 정의한 값을 셀렉터로 불러온다.
+- 셀렉터로 식별할 수 있는 파드가 여러 개라면, 여러 개의 파드에 대해 로드밸런싱을 수행한다.
+  - 로드밸런싱 알고리즘은 무작위 알고리즘을 사용한다.
+
+### ClusterIP
+
+- 클러스터 안에서 가상 IP를 생성하여 서로 다른 서비스와 상호 통신을 할 수 있게 해준다.
+
+![ClusterIP](./cluster-ip.png)
+- 프론트엔드, 백엔드, 데이터베이스와 같이 여러 레이어로 구성된 애플리케이션을 사용할 경우, 여러 파드 간 통신을 원활하게 하기 위한 엔드포인트 역할을 한다.
+- 각 레이어는 다른 레이어에 미칠 영향을 고려할 필요 없이 Scale-out이 가능하다.
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: back-end
+spec:
+  type: ClusterIP
+  ports:
+    - targetPort: 80
+      port: 80
+  selector:
+    app: myapp
+    type: back-end
+```
+
+### LoadBalancer
+
+- 클라우드 공급자(e.g. AWS, GCP, Azure)에서 제공하는 로드밸런서를 사용할 수 있도록 지원하고 있다.
+- yaml 파일에서 type을 LoadBalancer로 지정하면, 클라우드 플랫폼에서 실행 시 네이티브 로드밸런서를 지원한다.
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-service
+spec:
+  type: LoadBalancer
+  ports:
+    - targetPort: 80
+      port: 80
+      nodePort: 30008
+```
