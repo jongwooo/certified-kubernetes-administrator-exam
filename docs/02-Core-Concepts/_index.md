@@ -441,3 +441,44 @@ spec:
     kubectl scale --replicas=6 -f replicaset-definition.yaml
     # kubectl scale --replicas=6 -f replicaset myapp-replicaset
     ```
+
+## Deployment
+
+![Deployment](./deployment.png)
+
+- 디플로이먼트는 레플리카셋보다 상위 개념의 오브젝트이다.
+  - 롤링 업데이트 기능
+  - 롤백 기능
+  - 스케일링/모니터링과 같은 기능을 모든 파드에 일괄 적용하기 위한 pause/resume 기능
+
+**디플로이먼트**
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-deployment
+  labels:
+    app: myapp
+    type: front-end
+spec:
+  template:
+    metadata:
+      name: myapp-pod
+      labels:
+        app: myapp
+        type: front-end
+    spec:
+      containers:
+        - name: nginx-container
+          image: nginx
+  replicas: 3
+  selector:
+    matchLabels:
+      type: front-end
+```
+
+- 아래 명령어를 통해 디플로이먼트를 확인할 수 있다.
+  ```bash
+  kubectl get deployments
+  ```
