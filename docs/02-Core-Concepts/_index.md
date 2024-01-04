@@ -292,9 +292,9 @@ wget https://storage.googleapis.com/kubernetes-release/release/v1.27.0/bin/linux
 - 쿠버네티스는 컨테이너를 직접적으로 워커 노드에 배포하지 않는다.
 - 컨테이너는 파드라는 오브젝트로 캡슐화되며, 파드는 쿠버네티스에서 가장 작은 오브젝트이다.
 
-![Pod Scale up](./pod-scale-up.png)
+![Pod Scale out](./pod-scale-out.png)
 
-- 트래픽이 증가해 Scale-up을 할 경우, 같은 파드 내 새로운 컨테이너가 생성되는 것이 아니라 새로운 파드가 생성된다.
+- 트래픽이 증가해 Scale-out을 할 경우, 같은 파드 내 새로운 컨테이너가 생성되는 것이 아니라 새로운 파드가 생성된다.
 - 현재 노드가 충분한 용량을 확보하지 못할 경우, 새로운 노드에 파드가 추가된다.
 
 ### Multi-Container Pods
