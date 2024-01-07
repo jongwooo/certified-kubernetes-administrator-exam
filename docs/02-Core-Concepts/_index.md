@@ -561,3 +561,91 @@ spec:
       port: 80
       nodePort: 30008
 ```
+
+## Namespaces
+
+- 네임스페이스로 각 환경을 구분지을 수 있다.
+- 네임스페이스별로 자원을 각각 할당할 수 있다.
+- 네임스페이스 내에서 리소스들은 이름으로 호출할 수 있다.
+
+![Namespace](./namespace.png)
+
+- default 네임스페이스는 클러스터가 처음 구성될 때 쿠버네티스에 의해 자동 생성된다.
+- 내부 목적으로 사용하는 파드와 서비스 등은 사용자에 의해 실수로 삭제되는 것을 방지하기 위해 kube-system 네임스페이스에 생성된다.
+- 모든 사용자들이 리소스를 사용 가능하게 하려면 kube-public 네임스페이스에 생성한다.
+
+![Namespace Isolation](./namespace-isolation.png)
+
+- 기업이나 프로덕션 환경에서는 네임스페이스 사용을 고려해야 한다.
+- 예를 들어, 네임스페이스를 통해 dev와 prod 환경에서 리소스를 분리할 수 있다.
+- 리소스 쿼터를 통해 네임스페이스별 리소스 사용을 제한할 수 있다.
+
+### Commands
+
+- `kubectl get pods`는 default 네임스페이스에 있는 파드만 열거한다.
+- `--namespace` 옵션을 통해 해당 네임스페이스의 파드를 열거할 수 있다.
+  ```bash
+  kubectl get pods --namespace=kube-system
+  ```
+- `--all-namespaces` 옵션을 통해 모든 네임스페이스의 파드를 열거할 수 있다.
+  ```bash
+  kubectl get pods --all-namespaces
+  ```
+- 다른 네임스페이스에 파드를 생성하려면, `--namespace` 옵션을 사용한다.
+  ```bash
+  kubectl create -f pod-definition.yaml --namespace=dev
+  ```
+- yaml 파일에서 metadata.namespace를 명시하면 해당 네임스페이스에 항상 생성된다.
+  ```yaml
+  metadata:
+    name: myapp-pod
+    namespace: dev
+  ```
+- 아래 명령어를 통해 현재 네임스페이스를 변경할 수 있다.
+  ```bash
+    kubectl config set-context $(kubectl config current-context) --namespace=dev
+  ```
+
+### 네임스페이스 생성하기
+
+**네임스페이스**
+
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev
+```
+
+- 또는 아래 명령어를 통해 네임스페이스를 생성할 수 있다.
+  ```bash
+  kubectl create namespace dev
+  ```
+
+### Resource Quota
+
+- 리소스 쿼터를 통해 네임스페이스에서 리소스를 제한할 수 있다.
+
+![Resource Quota](./resource-quota.png)
+
+**리소스 쿼터**
+
+```yaml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-quota
+  namespace: dev
+spec:
+  hard:
+    pods: "10"
+    requests.cpu: "4"
+    requests.memory: 5Gi
+    limits.cpu: "10"
+    limits.memory: 10Gi
+```
+
+- 아래 명령어를 통해 리소스 쿼터를 생성한다.
+  ```bash
+  kubectl create -f compute-quota.yaml
+  ```
