@@ -580,6 +580,19 @@ spec:
 - 예를 들어, 네임스페이스를 통해 dev와 prod 환경에서 리소스를 분리할 수 있다.
 - 리소스 쿼터를 통해 네임스페이스별 리소스 사용을 제한할 수 있다.
 
+### DNS
+
+![Namespace DNS](./namespace-dns.png)
+
+- 같은 네임스페이스의 리소스 간에는 이름만으로 호출이 가능하다.
+  ```text
+  mysql.connect("db-service")
+  ```
+- 다른 네임스페이스의 리소스를 호출하려면 서비스의 DNS 전체 이름을 입력해야 한다.
+  ```text
+  mysql.connect("db-service.dev.svc.cluster.local")
+  ```
+
 ### Commands
 
 - `kubectl get pods`는 default 네임스페이스에 있는 파드만 열거한다.
