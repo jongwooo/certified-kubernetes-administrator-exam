@@ -662,3 +662,84 @@ spec:
   ```bash
   kubectl create -f compute-quota.yaml
   ```
+
+## Imperative vs Declarative
+
+### Imperative
+
+- 순차적으로 what to do, how to do를 입력하는 방식이다.
+- 재현성이 보장되지 않는다.
+- 설치 환경이나 실행 환경에 따라 절차를 추가/변경해야 할 수 있다.
+
+**Imperative Commands**
+
+- Create Objects
+  ```bash
+  kubectl run --image=nginx nginx
+  ```
+
+  ```bash
+  kubectl create deployment --image=nginx nginx
+  ```
+
+  ```bash
+  kubectl expose deployment nginx --port 80
+  ```
+
+- Update Objects
+  ```bash
+  kubectl edit deployment nginx
+  ```
+
+  ```bash
+  kubectl scale deployment nginx --replicas=5
+  ```
+
+  ```bash
+  kubectl set image deployment nginx nginx=nginx:1.18
+  ```
+
+**Imperative Object Configuration Files**
+
+- Create Objects
+  ```bash
+  kubectl create -f nginx.yaml
+  ```
+
+- Update Objects
+  ```bash
+  kubectl edit deployment nginx
+  ```
+
+  ```bash
+  kubectl replace -f nginx.yaml
+  ```
+
+  ```bash
+  kubectl replace --force -f nginx.yaml
+  ```
+
+  ```bash
+  kubectl create -f nginx.yaml
+  ```
+
+### Declarative
+
+- 목표를 지정하고, 방법은 설정하지 않는다.
+- 대표적으로 Ansible, Terraform, Puppet이 있다.
+
+**Declarative**
+
+- Create Objects
+  ```bash
+  kubectl apply -f nginx.yaml
+  ```
+
+  ```bash
+  kubectl apply -f /path/to/config-files
+  ```
+
+- Update Objects
+  ```bash
+  kubectl apply -f nginx.yaml
+  ```
