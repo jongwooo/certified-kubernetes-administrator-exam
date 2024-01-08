@@ -743,3 +743,13 @@ spec:
   ```bash
   kubectl apply -f nginx.yaml
   ```
+
+## Kubectl Apply
+
+### 내부적으로 어떻게 동작할까?
+
+- `kubectl apply` 명령어는 오브젝트가 존재하지 않을 경우, 생성한다.
+- 쿠버네티스 클러스터의 Live object configuration에는 로컬 yaml 파일 구성에 더하여 오브젝트의 상태를 저장하기 위한 추가적인 필드가 존재한다.
+- 로컬 yaml 파일에 변경이 발생할 경우, Last applied configuration(json)과 Live object configuration을 함께 비교하여 변경 사항을 식별한다.
+  - 변경 사항이 있을 경우, Live object configuration이 먼저 변경되고 Last applied configuration이 업데이트된다.
+  - Last applied configuration은 Live object configuration의 annotations.last-applied-configuration 필드에 저장된다.
