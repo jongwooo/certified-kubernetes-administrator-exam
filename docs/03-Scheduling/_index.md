@@ -80,3 +80,40 @@ spec:
 ### Annotations
 
 - 레이블과 셀렉터는 그룹화에 사용되지만, 어노테이션은 그 외 세부사항을 기록하는데 사용된다.
+
+## Taints and Tolerations
+
+![Taints and Tolerations](./taints-and-tolerations.png)
+
+- 테인트와 톨러레이션은 노드에서 스케쥴링 될 수 있는 파드를 제한할 때 사용한다.
+- 노드와 파드가 제한이 없는 경우, 밸런싱되어 파드는 노드에 스케쥴링되어 할당된다.
+- 특정 노드에 테인트를 추가하면, 일반적인 파드는 해당 노드에 할당될 수 없다.
+- 파드에 노드의 테인트에 해당하는 톨러레이션을 추가하면, 해당 노드에 할당될 수 있다.
+- 테인트 조건에 해당하지 않는 파드에 대한 옵션인 taint-effect는 세 가지가 있다:
+  - NoSchedule: 테인트가 허용되지 않는 파드는 스케쥴링하지 않는다. 이미 실행 중인 파드는 관여하지 않는다.
+  - PreferNoSchedule: 테인트가 허용되지 않는 파드는 스케쥴링하지 않으려고 한다. 하지만 클러스터 리소스가 부족한 상황 등에 대해서는 톨러레이션을 만족하지 않아도 노드에 스케쥴링된다.
+  - NoExecute: 테인트가 허용되지 않는 파드는 스케쥴링하지 않는다. 이미 실행 중인 파드도 축출한다.
+
+### How to use
+
+- 아래 명령어를 통해 노드에 테인트를 적용할 수 있다.
+  ```bash
+  kubectl taint nodes node01 app=blue:taint-effect
+  ```
+- 아래 명령어를 통해 테인트를 확인할 수 있다.
+  ```bash
+  kubectl describe node node01 | grep Taint
+  ```
+- 톨러레이션은 아래와 같이 구성한다.
+  ```yaml
+  spec:
+    containers:
+      - name: nginx-container
+        image: nginx
+    tolerations:
+      - key: "app"
+        operator: "Equal"
+        value: "bule"
+        effect: "NoSchedule"
+  ```
+  - 톨러레이션과 관련된 모든 값은 큰따옴표로 묶어주어야 한다.
