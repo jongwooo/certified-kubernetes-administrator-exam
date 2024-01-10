@@ -146,3 +146,40 @@ spec:
   - medium, large 값을 가진 노드만 선택하고 싶다면 어떡할까?
   - 같은 의미로, small이 아닌 노드만 선택하고 싶다면 어떡할까?
 - 이러한 한계를 보완하기 위해 나온 것이 노드어피니티 기능이다.
+
+
+## Node Affinity
+
+- 노드어피니티는 특정 노드에 파드를 확실하게 할당하기 위한 기능이다.
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-pod
+spec:
+  containers:
+    - name: data-processor
+      image: data-processor
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+            - key: size
+              operator: In
+              values:
+                - Large
+                - Medium
+```
+
+### Node Affinity Types
+
+**Available**
+
+- requiredDuringSchedulingIgnoredDuringExecution: 규칙이 만족되지 않으면 스케쥴러가 파드를 스케쥴링할 수 없다.
+- preferredDuringSchedulingIgnoredDuringExecution: 스케쥴러는 조건을 만족하는 노드를 찾으려고 노력한다. 해당되는 노드가 없더라도, 스케쥴러는 여전히 파드를 스케쥴링한다.
+
+**Planned**
+
+- requiredDuringSchedulingRequiredDuringExecution: 규칙이 만족되지 않으면 스케쥴러가 파드를 스케쥴링할 수 없다. 또한 실행 중에 레이블이 변경되어 규칙에 만족되지 않으면 파드는 축출된다.
