@@ -194,3 +194,81 @@ spec:
 - 두 번째 상황으로, blue, red, green의 레이블을 추가한 노드가 있으며 각 파드에도 노드어피니티를 사용하여 노드가 스케줄링되도록 적용한 상황이다. 이 상황에서의 문제는 어떠한 노드어피니티도 추가하지
   않은 파드가 레이블이 적용된 노드에 스케줄링 될 수 있다는 문제가 있다.
 - 따라서 테인트/톨러레이션과 노드어피니티를 조합해서 사용해야 완전한 물리적 노드 분리가 가능해진다.
+
+## Resource Requirements and Limits
+
+- 각 노드마다 할당된 자원이 있다(e.g. CPU, 메모리, 디스크).
+- 쿠버네티스 스케줄러에 의해 각 노드의 자원 상황에 맞게 파드가 할당된다.
+- 그런데 어떠한 노드도 추가적인 파드를 감당할 자원이 부족한 상황이 발생하면 어떻게 될까?
+- 쿠버네티스는 해당 파드를 스케줄링하는 것을 보류한다. 그리고 해당 파드는 Pending 상태가 된다.
+
+### Resource
+
+- 쿠버네티스는 기본값으로 파드에 0.5CPU, 256Mi 메모리를 할당한다.
+- 이는 노드에 파드를 할당할 때 컨테이너에 의해 요청된 최소의 CPU/메모리의 양이다. 이 숫자로 파드를 할당할 충분한 리소스 여유가 있는지 판단한다.
+- resources.requests.cpu와 resources.requests.memory 필드로 설정 가능하다.
+  ```yaml
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: 1
+  ```
+
+### Limit
+
+- 한정된 자원을 설정할 수 있다.
+  ```yaml
+  resources:
+    limits:
+      memory: "2Gi"
+      cpu: 2
+  ```
+
+### 초과하려고 하면?
+
+- 만약 제한된 자원을 실행 중에 초과하려고 하면 어떻게 할까?
+- CPU의 경우 쿠버네티스가 지정된 제한을 초과하지 않도록 조절한다.
+  - 컨테이너는 제한된 CPU보다 많은 자원을 사용할 수 없기 때문이다.
+- 메모리의 경우 다르다. 지정된 제한을 초과할 수 있다.
+  - 컨테이너가 지정된 메모리보다 더 많은 메모리 자원을 사용할 수 있기 때문이다.
+  - 하지만 파드가 지속적으로 제한된 자원보다 많은 메모리를 사용하려고 하면 파드는 Out Of Memory 에러가 발생하며 종료된다.
+
+### LimitRange
+
+- 기본값으로 정해진 자원을 선택하기 위해서는 해당 네임스페이스에서 리밋레인지라는 리소스를 사전에 정의해야 한다.
+
+```yaml
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: cpu-resource-constraint
+spec:
+  limits:
+    - default:
+        cpu: 500m
+      defaultRequest:
+        cpu: 500m
+      max:
+        cpu: "1"
+      min:
+        cpu: 100m
+      type: Container
+```
+
+```yaml
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: memory-resource-constraint
+spec:
+  limits:
+    - default:
+        memory: 1Gi
+      defaultRequest:
+        memory: 1Gi
+      max:
+        memory: 1Gi
+      min:
+        memory: 500Mi
+      type: Container
+```
