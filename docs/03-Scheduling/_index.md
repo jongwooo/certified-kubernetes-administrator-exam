@@ -183,3 +183,12 @@ spec:
 **Planned**
 
 - requiredDuringSchedulingRequiredDuringExecution: 규칙이 만족되지 않으면 스케줄러가 파드를 스케줄링할 수 없다. 또한 실행 중에 레이블이 변경되어 규칙에 만족되지 않으면 파드는 축출된다.
+
+## Node Affinity vs Taints and Tolerations
+
+![Taints/Tolerations and Node Affinity](./taints-tolerations-and-node-affinity.png)
+
+- 테인트와 톨러레이션으로 물리적으로 완전히 노드를 분리할 수는 없다. 예를 들어 blue, red, green으로 테인트한 노드가 있고, 테인트가 없는 노드가 두 개 있다. 파드 또한 각 blue, red, green의 톨러레이션을 추가한 파드가 있다.
+- 이때 blue로 톨러레이션된 파드가 blue로 테인트한 노드에만 스케줄링된다고 보장할 수 있는가? 그렇지 않다. 테인트가 존재하지 않는 노드에도 스케줄링 될 수 있다.
+- 두 번째 상황으로, blue, red, green의 레이블을 추가한 노드가 있으며 각 파드에도 노드어피니티를 사용하여 노드가 스케줄링되도록 적용한 상황이다. 이 상황에서의 문제는 어떠한 노드어피니티도 추가하지 않은 파드가 레이블이 적용된 노드에 스케줄링 될 수 있다는 문제가 있다.
+- 따라서 테인트/톨러레이션과 노드어피니티를 조합해서 사용해야 완전한 물리적 노드 분리가 가능해진다.
