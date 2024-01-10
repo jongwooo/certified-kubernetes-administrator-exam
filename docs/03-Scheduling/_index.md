@@ -117,3 +117,32 @@ spec:
         effect: "NoSchedule"
   ```
   - 톨러레이션과 관련된 모든 값은 큰따옴표로 묶어주어야 한다.
+
+## Node Selectors
+
+- 노드셀렉터는 파드의 nodeSelector 필드에 명시된 레이블을 가지고 있는 노드 중에 하나를 선택하여 스케쥴링할 수 있도록 하는 기능이다.
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-pod
+spec:
+  containers:
+    - name: data-processor
+      image: data-processor
+  nodeSelector:
+    size: Large
+```
+
+- 노드에도 해당 키 값에 해당하는 레이블을 지정해주어야 한다. 아래 명령어를 통해 레이블을 지정할 수 있다.
+  ```bash
+  kubectl label nodes node01 size=Large
+  ```
+
+### 한계
+
+- 노드셀렉터는 다음과 같은 한계를 가지고 있다. 레이블 small, medium, large을 가진 노드가 있다고 가정하자.
+  - medium, large 값을 가진 노드만 선택하고 싶다면 어떡할까?
+  - 같은 의미로, small이 아닌 노드만 선택하고 싶다면 어떡할까?
+- 이러한 한계를 보완하기 위해 나온 것이 노드어피니티 기능이다.
