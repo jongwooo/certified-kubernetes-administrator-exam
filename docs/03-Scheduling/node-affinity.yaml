@@ -11,9 +11,8 @@ spec:
       requiredDuringSchedulingIgnoredDuringExecution:
         nodeSelectorTerms:
           - matchExpressions:
-            - key: size
-              operator: In
-              values:
-                - Large
-                - Mediuim
-
+              - key: size
+                operator: In
+                values:
+                  - Large
+                  - Mediuim

@@ -6,4 +6,3 @@ target:
   apiVersion: v1
   kind: Node
   name: node02
-
