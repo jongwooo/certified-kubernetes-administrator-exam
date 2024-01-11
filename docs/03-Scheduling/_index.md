@@ -317,3 +317,21 @@ spec:
   kubectl create deployment elasticsearch --image=registry.k8s.io/fluentd-elasticsearch:1.20 -n kube-system --dry-run=client -o yaml > fluentd.yaml
   vim fluentd.yaml
   ```
+
+## Static Pods
+
+![Static Pods](./static-pods.png)
+
+- 마스터 노드의 kube-apiserver와 워커 노드의 kubelet이 통신을 한다는 것을 알고 있다. 그렇다면 마스터 노드의 모든 리소스가 없는 상태라면 워커 노드는 스스로 작동할 수 있을까? kubelet만
+  있다면 할 수 있다. 이것이 스태틱 파드이다.
+- 하지만 매니페스트 파일과 통신할 kube-apiserver도 없는데 kubelet 혼자서 어떻게 생성할까?
+  - `etc/kubernetes/manifests`에서 파드 정의 파일을 읽도록 kubelet을 구성할 수 있다.
+- kubelet은 주기적으로 해당 디렉토리의 파일을 읽으며 호스트에 파드를 생성한다.
+- 생성 뿐만 아니라 활성 상태로 만든다. 파드 충돌이 발생하면 kubelet은 충돌한 파드를 다시 시작할 수도 있다.
+- 이 디렉토리의 파일에 변경이 발생하면 kubelet은 이 변경 사항을 적용하여 파드를 재생성한다.
+- 이 디렉토리의 파일이 삭제되면 파드도 자동으로 삭제된다.
+- 오직 파드만 생성 가능하다는 것에 주의하자.
+
+### 어디서 쓰는데?
+
+- 마스터 노드에서 컨트롤 플레인 역할을 하는 파드를 스태틱 파드를 통해 생성할 수 있다.
