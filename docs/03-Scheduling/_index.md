@@ -335,3 +335,56 @@ spec:
 ### 어디서 쓰는데?
 
 - 마스터 노드에서 컨트롤 플레인 역할을 하는 파드를 스태틱 파드를 통해 생성할 수 있다.
+
+## Multiple Schedulers
+
+- 스케줄러도 한 개 이상 생성할 수 있다. 왜 한 개 이상의 생성이 필요할까?
+  - 이전에 테인트/톨러레이션, 노드어피니티, 노드셀렉터를 통해 스케줄러가 특정 노드에 특정 파드를 생성하도록 했다.
+  - 그런데 복합적인 절차들이 맞물려서 여러 개의 스케줄 조건이 필요할 수 있다.
+  - 쿠버네티스에서는 다중 스케줄러를 지원한다.
+
+### 커스텀 스케줄러 배포하기
+
+```bash
+wget https://storage.googleapis.com/kubernetes-release/release/v1.27.0/bin/linux/amd64/kube-scheduler
+```
+
+- `--scheduler-name` 옵션을 변경한다.
+- schedulerName 필드가 파드 생성 시 스케줄러를 선택하는 키 값이 된다.
+
+### Kubeadm으로 커스텀 스케줄러 배포하기
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-custom-scheduler
+  namespace: kube-system
+spec:
+  containers:
+    - command:
+        - kube-scheduler
+        - --address=127.0.0.1
+        - --kubeconfig=/etc/kubernetes/scheduler.conf
+        - --leader-elect=true
+      image: k8s.gcr.io/kube-scheduler-amd64:v1.11.3
+      name: kube-scheduler
+```
+
+- 마찬가지로, `--scheduler-name` 옵션을 변경한다.
+- `--leader-elect` 은 여러 개의 스케줄러가 마스터 노드에 있다고 할 때, 어떤 스케줄러가 실행될 것인지 결정하는 옵션이다.
+  - 마스터 노드가 하나만 있는 상황에서 스케줄러가 여러 개라면, 하나를 뺀 나머지는 false 옵션을 줘야 한다.
+  - 고가용성을 위해 다중 마스터 노드를 구성할 경우, `--lock-object-name` 옵션에 스케줄러 이름을 추가해야 한다.
+
+### 커스텀 스케줄러 사용하기
+
+- 정상적으로 배포가 완료되었다면, 아래 명령어를 통해 스케줄러를 확인할 수 있다.
+  ```bash
+  kubectl get events
+  ```
+- 파드 생성 시 schedulerName 필드에 스케줄러 파드의 이름을 명시하면, 해당 스케줄러를 통해 배포할 수 있다.
+- 만약 스케줄러에 오류가 있을 경우 요청한 파드는 Pending 상태가 된다.
+- 로그는 아래 명령어를 통해 확인할 수 있다.
+  ```bash
+  kubectl logs my-custom-scheduler --name-space=kube-system 
+  ```
