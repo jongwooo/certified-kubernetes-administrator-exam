@@ -272,3 +272,48 @@ spec:
         memory: 500Mi
       type: Container
 ```
+
+## DaemonSets
+
+![DaemonSet](./daemonset.png)
+
+- 데몬셋은 여러 파드를 배포하는데 도움을 주기 때문에 레플리카셋과 비슷하다.
+- 하지만 데몬셋은 각 파드가 배포되어 있는 노드 하나 당 하나만 추가한다.
+- 즉, 데몬셋은 클러스터의 모든 노드에 항상 하나의 파드 복사본이 존재하도록 한다.
+- 데몬셋은 모니터링 솔루션과 로그 뷰어에 아주 적합하다.
+- 노드가 새로 생성되거나 삭제될 때 데몬셋의 파드 역시 생성 또는 삭제된다.
+
+```yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: monitoring-daemon
+spec:
+  selector:
+    matchLabels:
+      app: monitoring-agent
+  template:
+    metadata:
+      labels:
+        app: monitoring-agent
+    spec:
+      containers:
+        - name: monitoring-agent
+          image: monitoring-agent
+```
+
+### Commands
+
+- 아래 명령어를 통해 데몬셋을 확인할 수 있다.
+  ```bash
+  kubectl get daemonsets
+  ```
+- 자세한 내용을 살펴보려면 `kubectl describe` 명령어를 사용한다.
+  ```bash
+  kubectl describe daemonsets monitoring-daemon
+  ```
+- `kubectl create` 명령어를 통해 디플로이먼트에 대한 yaml 파일을 생성하고 kind 필드를 DaemonSet으로 변경하면 쉽게 작성할 수 있다.
+  ```bash
+  kubectl create deployment elasticsearch --image=registry.k8s.io/fluentd-elasticsearch:1.20 -n kube-system --dry-run=client -o yaml > fluentd.yaml
+  vim fluentd.yaml
+  ```
