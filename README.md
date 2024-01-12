@@ -6,3 +6,4 @@
 - [02-Core-Concepts](docs/02-Core-Concepts/_index.md)
 - [03-Scheduling](docs/03-Scheduling/_index.md)
 - [04-Logging-and-Monitoring](docs/04-Logging-and-Monitoring/_index.md)
+- [05-Application-Lifecycle-Management](docs/05-Application-Lifecycle-Management/_index.md)
