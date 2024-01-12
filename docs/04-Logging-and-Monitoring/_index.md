@@ -22,3 +22,15 @@
   ```bash
   kubectl top pod pod01
   ```
+
+## Application Logs
+
+- 도커 컨테이너의 로깅과 비슷하다.
+- 아래 명령어를 통해 특정 파드에 대한 로그를 확인할 수 있다.
+  ```bash
+  kubectl logs -f event-simulator.yaml
+  ```
+- 다중 컨테이너에서 로그를 확인하려면, 파드 중 어떤 컨테이너의 로그를 확인할 것인지 다시 한 번 더 명시해줘야 한다.
+  ```bash
+  kubectl logs -f event-simulator-pod event-simulator
+  ```
