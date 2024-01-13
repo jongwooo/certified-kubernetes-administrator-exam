@@ -45,3 +45,28 @@
   ```bash
   kubectl rollout undo deployment/myapp-deploy
   ```
+
+## Commands and Arguments
+
+- Dockerfile의 ENTRYPOINT는 쿠버네티스의 command 필드와 대응되며, CMD는 쿠버네티스의 args 필드와 대응된다.
+
+```dockerfile
+FROM Ubuntu
+
+ENTRYPOINT [ "sleep" ]
+
+CMD [ "5" ]
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ubuntu-sleeper-pod
+spec:
+  containers:
+    - name: ubuntu-sleeper
+      image: ubuntu-sleeper
+      command: [ "sleep2.0" ]
+      args: [ "10" ]
+```
