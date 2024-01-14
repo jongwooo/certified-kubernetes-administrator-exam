@@ -236,3 +236,33 @@ spec:
       secret:
         secretName: app-secret
   ```
+
+## Multi Container Pods
+
+- 마이크로서비스 아키텍쳐가 등장하면서 각 서비스를 스케일 업/다운하는 작업이 수월해졌다.
+- 하지만 마이크로서비스임에도 불구하고 특정 서비스의 경우 같이 써야 효과적인 경우가 있다(e.g. 애플리케이션과 로깅 서비스).
+
+![Multi Container Pods](./multi-container-pods.png)
+
+- 같은 네트워크를 사용하므로 서로 로컬호스트처럼 접근이 가능하다.
+- 동일한 스토리지 볼륨을 공유한다.
+
+### Create
+
+- spec.containers 필드에 여러 컨테이너를 명시하면 된다.
+  ```yaml
+  apiVersion: v1
+  kind: Pod
+  metadata:
+    name: simple-webapp
+    labels:
+      name: simple-webapp
+  spec:
+    containers:
+      - name: simple-webapp
+        image: simple-webapp
+        ports:
+          - containerPort: 8080
+      - name: log-agent
+        image: log-agent
+  ```
