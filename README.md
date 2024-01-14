@@ -7,3 +7,4 @@
 - [03-Scheduling](docs/03-Scheduling/_index.md)
 - [04-Logging-and-Monitoring](docs/04-Logging-and-Monitoring/_index.md)
 - [05-Application-Lifecycle-Management](docs/05-Application-Lifecycle-Management/_index.md)
+- [06-Cluster-Maintenance](docs/06-Cluster-Maintenance/_index.md)
