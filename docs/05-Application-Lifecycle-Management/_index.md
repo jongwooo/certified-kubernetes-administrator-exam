@@ -266,3 +266,30 @@ spec:
       - name: log-agent
         image: log-agent
   ```
+
+## Init Containers
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-pod
+  labels:
+    app: myapp
+spec:
+  containers:
+    - name: myapp-container
+      image: busybox:1.28
+      command: [ 'sh', '-c', 'echo The app is running! && sleep 3600' ]
+  initContainers:
+    - name: init-myservice
+      image: busybox
+      command: [ 'sh', '-c', 'git clone <some-repository-that-will-be-used-by-application>; done;' ]
+```
+
+- 파드 컨테이너가 실행될 때, 메인 프로세스 컨테이너 실행 전에 선행 작업이 필요한 경우(e.g. 원격 저장소로부터 소스코드나 바이너리 파일을 받아 메인 애플리케이션에 사용하고자 할 경우) 초기화 컨테이너를
+  사용한다.
+- 파드가 실행될 때 초기화 컨테이너가 먼저 실행된다.
+- 애플리케이션 컨테이너가 실행되기 전에 초기화 컨테이너의 실행이 완료되어야 한다.
+- 초기화 컨테이너는 여러 개 정의할 수 있고, 순차적으로 실행된다.
+- 초기화 컨테이너가 실패하면 성공할 때까지 파드를 재실행한다.
