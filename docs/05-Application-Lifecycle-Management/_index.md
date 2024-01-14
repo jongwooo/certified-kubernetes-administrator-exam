@@ -70,3 +70,26 @@ spec:
       command: [ "sleep2.0" ]
       args: [ "10" ]
 ```
+
+## Configure Environment Variables in Applications
+
+- 쿠버네티스에서 환경변수를 설정하는 방법은 다음과 같다.
+  ```yaml
+  env:
+    - name: APP_COLOR
+      value: pink
+  ```
+- 컨피그맵을 통해 환경변수를 설정하는 방법은 다음과 같다.
+  ```yaml
+  env:
+    - name: APP_COLOR
+      valueFrom:
+        configMapKeyRef:
+  ```
+- 시크릿을 통해 환경변수를 설정하는 방법은 다음과 같다.
+  ```yaml
+  env:
+    - name: APP_COLOR
+      valueFrom:
+        secretKeyRef:
+  ```
