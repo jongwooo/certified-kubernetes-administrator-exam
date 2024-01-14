@@ -93,3 +93,67 @@ spec:
       valueFrom:
         secretKeyRef:
   ```
+
+## Configuring ConfigMaps in Applications
+
+- 환경변수를 파드 매니페스트 파일에 정의할 수 있지만, 환경변수를 각 파드별로 관리하는 것보다 컨피그맵을 통해 하나의 파일에서 모든 환경변수를 관리하는 것이 효율적이다.
+
+### Create ConfigMaps
+
+- `--from-literal` 옵션을 사용하여 명령형 방식으로 컨피그맵을 생성할 수 있다.
+  ```bash
+  kubectl create configmap \
+    app-config --from-literal=APP_COLOR=blue \
+               --from-literal=APP_MODE=prod
+  ```
+- 또는 `--from-file` 옵션을 통해 해당 파일을 읽어 컨피그맵을 생성할 수 있다.
+  ```bash
+  kubectl create configmap \
+    app-config --from-file=app_config.properties
+  ```
+- 아래와 같이 선언형으로 컨피그맵을 생성할 수 있다.
+  ```yaml
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: app-config
+  data:
+    APP_COLOR: "blue"
+    APP_MODE: "prod"
+  ```
+
+### View ConfigMaps
+
+- 아래 명령어를 통해 생성된 컨피그맵을 조회할 수 있다.
+  ```bash
+  kubectl get configmaps
+  ```
+- 아래 명령어를 통해 생성된 컨피그맵의 정보를 확인할 수 있다.
+  ```bash
+  kubectl describe configmaps
+  ```
+
+### ConfigMap in Pods
+
+- 아래와 같이 envFrom.configMapRef 필드에 생성된 컨피그맵 이름을 지정할 수 있다.
+  ```yaml
+  envFrom:
+    - configMapRef:
+      name: app-config
+  ```
+- 단일 환경변수로 주입하려면 env.valueFrom.configMapKeyRef 필드에 생성된 컨피그맵 이름을 지정하고, 환경변수 이름을 key로 지정한다.
+  ```yaml
+  env:
+    - name: APP_COLOR
+      valueFrom:
+        configMapKeyRef:
+          name: app-config
+          key: APP_COLOR
+  ```
+- 또는 볼륨에 컨피그맵을 마운트할 수 있다.
+  ```yaml
+  volumes:
+    - name: app-config-volume
+      configMap:
+        name: app-config
+  ```
