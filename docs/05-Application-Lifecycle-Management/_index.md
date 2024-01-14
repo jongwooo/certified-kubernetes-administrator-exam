@@ -157,3 +157,82 @@ spec:
       configMap:
         name: app-config
   ```
+
+## Configure Secrets in Applications
+
+- 컨피그맵은 문자열 그대로 저장하기 때문에 민감한 정보를 저장할 때는 적절하지 않다.
+- 시크릿을 사용하면 해당 정보가 인코딩 또는 해시 상태로 저장되기 때문에 보안을 강화할 수 있다.
+
+### Create Secrets
+
+- `--from-literal` 옵션을 사용하여 명령형 방식으로 시크릿을 생성할 수 있다.
+  ```bash
+  kubectl create secret generic \
+    app-secret --from-literal=DB_HOST=mysql \
+               --from-literal=DB_USER=root \
+               --from-literal=DB_PASSWORD=paswrd
+  ```
+- 또는 `--from-file` 옵션을 통해 해당 파일을 읽어 시크릿을 생성할 수 있다.
+  ```bash
+  kubectl create secret generic \
+    app-config --from-file=app_secret.properties
+  ```
+- 아래와 같이 선언형으로 시크릿을 생성할 수 있다. 이때 인코딩된 형식으로 데이터를 지정해야 한다.
+  ```yaml
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: app-secret
+  data:
+    DB_HOST: "bXlzcWw="
+    DB_USER: "cm9vda=="
+    DB_PASSWORD: "cGFzd3Jk"
+  ```
+- 아래 명령어를 통해 일반 문자열에서 인코딩된 형식으로 변환할 수 있다.
+  ```bash
+  echo -n 'mysql' | base64
+  ```
+
+### View Secrets
+
+- 아래 명령어를 통해 생성된 시크릿을 조회할 수 있다.
+  ```bash
+  kubectl get secrets
+  ```
+- 아래 명령어를 통해 생성된 시크릿의 정보를 확인할 수 있다. 이때 값은 숨김 처리된다.
+  ```bash
+  kubectl describe secrets
+  ```
+- 아래 명령어를 통해 시크릿의 값을 조회할 수 있다.
+  ```bash
+  kubectl get secret app-secret -o yaml
+  ```
+- 아래 명령어를 통해 인코딩된 데이터를 디코딩할 수 있다.
+  ```bash
+  echo -n 'bXlzcWw=' | base64 --decode
+  ```
+
+### Secrets in Pods
+
+- 아래와 같이 envFrom.secretRef 필드에 생성된 시크릿 이름을 지정할 수 있다.
+  ```yaml
+  envFrom:
+    - secretRef:
+      name: app-secret
+  ```
+- 단일 환경변수로 주입하려면 env.valueFrom.secretKeyRef 필드에 생성된 시크릿 이름을 지정하고, 환경변수 이름을 key로 지정한다.
+  ```yaml
+  env:
+    - name: DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: app-secret
+          key: DB_PASSWORD
+  ```
+- 또는 볼륨에 시크릿을 마운트할 수 있다.
+  ```yaml
+  volumes:
+    - name: app-secret-volume
+      secret:
+        secretName: app-secret
+  ```
