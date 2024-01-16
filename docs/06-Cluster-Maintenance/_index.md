@@ -31,3 +31,86 @@
   ```bash
   kubectl cordon node-1
   ```
+
+## Cluster Upgrade Process
+
+- 쿠버네티스의 구성 요소들의 버전이 모두 같을 필요는 없다.
+- 하지만 kube-apiserver는 컨트롤 플레인의 핵심 구성 요소이기 때문에 다른 구성 요소들이 kube-apiserver보다 버전이 높으면 안된다.
+  - kube-controller-manager, kube-scheduler는 한 버전 더 낮을 수 있다.
+  - kubelet, kube-proxy는 두 버전까지 낮을 수 있다.
+  - kubectl은 1 버전 높거나, 같거나, 1 버전 낮을 수 있다.
+- 쿠버네티스는 오직 최근 세 개의 버전까지만 지원한다.
+- 추천되는 버전 업그레이드에 대한 접근은 마이너 버전을 하나씩 올리는 것이다.
+- 버전 업그레이드는 클러스터를 어떤 방식으로 구성했는지에 따라 다르다.
+  - 클라우드 제공자: 제공되는 업그레이드 기능을 사용한다.
+  - kubeadm: kubeadm을 통해 업그레이드한다.
+  - scratch: 수동으로 업그레이드한다.
+
+### 어떻게 업그레이드할까?
+
+**마스터 노드 업그레이드**
+
+- 마스터 노드가 업그레이드할 동안 kube-apiserver, kube-controller-manager, kube-scheduler 등의 컨트롤 플레인 구성 요소들이 다운된다.
+- 마스터 노드가 다운된다고 해서 워커 노드가 영향을 받는 것은 아니다.
+- kube-apiserver가 다운되어 있기 때문에, 이와 관련된 리소스에는 접근할 수 없으며, 새로운 애플리케이션을 배포하거나 삭제하거나 수정할 수 없다.
+- 만약 파드가 죽으면, 새로운 파드가 자동으로 재생성되지 않는다.
+- 하지만 노드와 파드가 구동 중일 때는 영향을 받지 않는다.
+
+**워커 노드 업그레이드**
+
+1. 워커 노드를 한 번에 업그레이드한다: 업그레이드 동안 애플리케이션에 접근이 불가능하다.
+2. 워커 노드 하나씩 업그레이드한다: 워커 노드마다 하나씩 업그레이드할 노드의 파드를 다른 실행 중인 노드에 옮기고 업그레이드를 한다. 완료 후 다시 옮기는 과정을 반복한다.
+3. 버전 업그레이드한 새로운 노드를 클러스터에 추가하고, 기존 노드를 축출한다: 클라우드 제공자 환경에서 제공되는 기능이다.
+
+### Kubeadm을 통한 버전 업그레이드
+
+- 아래 명령어를 통해 업그레이드할 버전에 대한 정보를 알 수 있다.
+  ```bash
+  kubeadm upgrade plan
+  ```
+- 아래 명령어를 통해 업그레이드를 적용할 수 있다.
+  ```bash
+  kubeadm upgrade apply <version>
+  ```
+- kubeadm은 kubelet을 업그레이드하지 않는다. 수동으로 업그레이드해야 한다.
+- kubeadm은 쿠버네티스 버전에 맞게 업그레이드되기 때문에 v1.11에서 바로 v1.13으로 업그레이드된다. 하지만 한 번에 한 버전씩 업그레이드하는 방법이 추천되기 때문에 아래와 같은 버전으로 버전을 한
+  단계씩 올리도록 하자.
+  ```bash
+  apt-get upgrade -y kubeadm=1.12.0-00
+  kubeadm upgrade apply v1.12.0
+  ```
+
+**마스터 노드 업그레이드**
+
+- `kubectl get nodes` 명령어를 통해 각 노드의 버전을 확인해도 버전이 변하지 않은 것을 확인할 수 있다.
+- 이는 kube-apiserver의 버전이 아닌, kube-apiserver에 등록된 kubelet의 버전이기 때문이다.
+- 마스터 노드의 kubelet도 수동으로 업그레이드해야 한다.
+- 아래 명령어를 통해 kubelet을 업그레이드할 수 있다.
+  ```bash
+  apt-get upgrade -y kubelet-1.12.0-00
+  systemctl restart kubelet
+  ```
+
+**워커 노드 업그레이드**
+
+- node-1, node-2, node-3의 세 개의 노드가 실행되고 있다고 가정한다.
+- 아래 명령어를 통해 먼저 node-1에 드레인을 적용한다.
+  ```bash
+  kubectl drain node-1
+  ```
+- 이후 ssh를 통해 노드에 접속하여 버전 업그레이드를 진행한다.
+  ```bash
+  apt-get upgrade -y kubeadm=1.12.0-00
+  apt-get upgrade -y kubelet=1.12.0-00
+  kubeadm upgrade node config --kubelet-version v1.12.0
+  systemctl restart kubelet
+  ```
+- 업그레이드 이후, 커든을 해제하여 스케줄링이 가능하도록 변경한다. 기존의 파드가 다시 해당 노드에 스케줄 되진 않지만 새로운 파드는 스케줄 될 것이다.
+  ```bash
+  kubectl uncordon node-1
+  ```
+- 위 과정을 각 워커 노드마다 반복한다.
+- 아래 명령어를 통해 업그레이드가 적용되었는지 확인할 수 있다.
+  ```bash
+  kubectl get nodes
+  ```
