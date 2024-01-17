@@ -114,3 +114,72 @@
   ```bash
   kubectl get nodes
   ```
+
+## Backup and Restore Methods
+
+- 백업은 중요하다. 깃허브와 같은 코드 레포지토리에 저장을 하면 재사용에도, 누군가와 공유하기도 편하기 때문에 큰 문제가 되지 않는다.
+- 하지만 누군가가 명령형 방식으로 리소스를 생성하였고, 이에 대한 문서도 전혀 남아 있지 않다면 어떻게 백업을 해야 할까?
+  - 모든 리소스를 파일로 저장하는 방법이 있다. 이는 일부 리소스 그룹에만 해당된다.
+    ```bash
+    kubectl get all --all-namespaces -o yaml > all-deploy-services.yaml
+    ```
+
+### ETCD Backup
+
+- etcd 클러스터는 클러스터의 상태에 대해 모든 정보를 저장한다.
+- 모든 리소스를 백업하는 대신, etcd 서버 자체를 백업할 수 있다.
+- etcd 클러스터는 마스터 노드에 호스팅되며, `--data-dir` 옵션을 통해 모든 데이터가 저장되는 위치를 확인할 수 있다.
+
+### ETCD Snapshot
+
+- etcd에는 스냅샷 솔루션이 내장되어 있다.
+- 아래 명령어를 통해 snapshot.db라는 스냅샷을 생성할 수 있다.
+  ```bash
+  ETCDCTL_API=3 etcdctl --endpoints 127.0.0.1:2379 \
+    --cert=/etc/kubernetes/pki/etcd/server.crt \
+    --key=/etc/kubernetes/pki/etcd/server.key \
+    --cacert=/etc/kubernetes/pki/etcd/ca.crt \
+    snapshot save snapshot.db
+  ```
+- 아래 명령어를 통해 저장된 스냅샷 파일을 확인할 수 있다.
+  ```bash
+  ETCDCTL_API=3 etcdctl snapshot status snapshot.db
+  ```
+
+### ETCD Restore
+
+- 아래 명령어를 통해 kube-apiserver를 중지시킨다.
+  ```bash
+  service kube-apiserver stop
+  ```
+- 아래 명령어를 통해 etcd 클러스터를 복구한다. `--data-dir` 옵션에 명시한 경로에 새로운 데이터 디렉토리가 생성된다.
+  ```bash
+  ETCDCTL_API=3 etcdctl \
+    snapshot restore snapshot.db \
+    --data-dir /var/lib/etcd-from-backup
+  ```
+- etcd.service의 `--data-dir` 필드를 수정하여 새로운 데이터 디렉토리를 사용하도록 한다.
+- 이후 etcd를 재시동하고 kube-apiserver를 실행한다.
+  ```bash
+  systemctl daemon-reload
+  service etcd restart
+  service kube-apiserver start
+  ```
+
+### ETCD가 스태틱 파드인 경우 복구하기
+
+- 아래 명령어를 통해 etcd 클러스터를 복구한다. `--data-dir` 옵션에 명시한 경로에 새로운 데이터 디렉토리가 생성된다.
+
+  ```bash
+  ETCDCTL_API=3 etcdctl \
+    snapshot restore snapshot.db \
+    --data-dir /var/lib/etcd-from-backup
+  ```
+
+- /etc/kubernetes/manifests/etcd.yaml에서 hostPath.path 필드를 수정하여 새로운 데이터 디렉토리를 사용하도록 한다.
+  ```yaml
+  - hostPath:
+      path: /var/lib/etcd-from-backup
+      type: DirectoryOrCreate
+    name: etcd-data
+  ```
