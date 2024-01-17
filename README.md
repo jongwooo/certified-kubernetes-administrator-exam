@@ -8,3 +8,4 @@
 - [04-Logging-and-Monitoring](docs/04-Logging-and-Monitoring/_index.md)
 - [05-Application-Lifecycle-Management](docs/05-Application-Lifecycle-Management/_index.md)
 - [06-Cluster-Maintenance](docs/06-Cluster-Maintenance/_index.md)
+- [07-Security](docs/07-Security/_index.md)
