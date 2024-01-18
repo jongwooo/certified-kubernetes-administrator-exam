@@ -27,3 +27,25 @@
 - Webhook Mode
 - etcd 클러스터, kube-controller-manager, kube-scheduler, kube-apiserver 와 같은 다양한 구성 요소 사이의 모든 통신은 TLS Encryption 에 의해 보호된다.
 - 클러스터 내의 애플리케이션 간의 통신은 네트워크 폴리시에 의해 제한된다.
+
+## Authentication
+
+- 쿠버네티스는 사용자 계정을 관리하지 않고 사용자를 관리하기 위해 외부 소스(파일, 인증서, LDAP 등)에 의존한다.
+- 사용자를 제외한 서비스어카운트의 경우 생성하고 관리할 수 있다.
+- 아래 명령어를 통해 서비스어카운트를 생성할 수 있다.
+  ```bash
+  kubectl create serviceaccount sa1
+  ```
+
+### Static Password File (Deprecated in 1.19)
+
+- 사용자와 비밀번호의 리스트를 담은 csv 파일을 생성하고 사용할 수 있다.
+- 해당 csv 파일에는 user, userID, password 세 개의 컬럼이 있다.
+- `--basic-auth-file` 옵션에 파일 경로를 지정하여 사용할 수 있다.
+- kubeadm을 사용한다면 kube-apiserver의 스태틱 파드에 `--basic-auth-file` 옵션을 추가한다.
+
+### Static Token File
+
+- 비밀번호 대신 토큰을 csv 파일에 저장하는 방식이다.
+- `--token-auth-file` 옵션에 파일 경로를 지정하여 사용할 수 있다.
+- kubeadm을 사용한다면 kube-apiserver의 스태틱 파드에 `--token-auth-file` 옵션을 추가한다.
