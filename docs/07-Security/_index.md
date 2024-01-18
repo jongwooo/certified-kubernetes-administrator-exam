@@ -131,3 +131,14 @@
   - kube-apiserver가 어떤 노드인지 알 수 있도록 이름이 지정된다.
   - 노드는 시스템 구성 요소이므로 system:node:node01과 같이 지정된다.
   - kube-apiserver가 올바른 권한을 주기 위해 노드들은 SYSTEM:NODES라는 그룹에 추가된다.
+
+## View Certificate Details
+
+- kubeadm으로 구성한 경우, 아래 명령어를 통해 kube-apiserver의 인증 정보를 살펴볼 수 있다.
+  ```bash
+  cat /etc/kubernetes/manifests/kube-apiserver.yaml
+  ```
+- 아래 명령어를 통해 특정 인증서의 정보를 확인할 수 있다.
+  ```bash
+  openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text -noout
+  ```
