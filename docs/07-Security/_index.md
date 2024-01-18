@@ -49,3 +49,12 @@
 - 비밀번호 대신 토큰을 csv 파일에 저장하는 방식이다.
 - `--token-auth-file` 옵션에 파일 경로를 지정하여 사용할 수 있다.
 - kubeadm을 사용한다면 kube-apiserver의 스태틱 파드에 `--token-auth-file` 옵션을 추가한다.
+
+## TLS Certification
+
+- 쿠버네티스 클러스터는 마스터 노드와 워커 노드로 구성되어 있다.
+- 노드들 간의 모든 통신은 보안이 필요하고 반드시 암호화되어야 한다.
+
+![TLS Certification](./tls-certification.png)
+
+- 쿠버네티스에는 각 리소스 간의 안전한 통신을 위해서 키 쌍이 존재하며, 각 증명은 CA에 서명된 증명이어야 한다.
