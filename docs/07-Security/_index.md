@@ -58,3 +58,76 @@
 ![TLS Certification](./tls-certification.png)
 
 - 쿠버네티스에는 각 리소스 간의 안전한 통신을 위해서 키 쌍이 존재하며, 각 증명은 CA에 서명된 증명이어야 한다.
+
+## Certificate Creation
+
+- 인증서를 생성할 수 있는 많은 도구가 있지만, 여기서는 OpenSSL을 사용하여 생성하는 것을 알아보자.
+
+### Root Certificate
+
+- 아래 명령어를 통해 개인키를 생성한다.
+  ```bash
+  openssl genrsa -out ca.key 2048
+  ```
+- 아래 명령어를 통해 Certificate Signing Request (CSR)을 할 수 있다. 아직 서명이 되지 않은 상태이다.
+  ```bash
+  openssl req -new -key ca.key -subj "/CN=KUBERNETES-CA" -out ca.csr
+  ```
+- 앞에서 만든 ca.crt와 ca.key를 통해 인증서에 서명한다.
+  ```bash
+  openssl x509 -req -in ca.csr -signkey ca.key -out ca.crt
+  ```
+
+### Client Certificate
+
+- admin 생성 과정과 kube-scheduler, kube-controller-manager, kube-proxy의 생성 과정은 동일하다.
+- admin user를 위한 인증서 생성은 다음과 같다:
+  - 아래 명령어를 통해 개인키를 생성한다.
+    ```bash
+    openssl genrsa -out admin.key 2048
+    ```
+  - 아래 명령어를 통해 Certificate Signing Request (CSR)을 할 수 있다. 사용자 이름(kube-admin)을 명시해야 한다.
+    ```bash
+    openssl req -new -key admin.key -subj "/CN=kube-admin" -out admin.csr
+    ```
+  - 앞에서 만든 ca.crt와 ca.key를 통해 인증서에 서명한다.
+     ```bash
+     openssl x509 -req -in ca.csr -signkey ca.key -out ca.crt
+     ```
+- 위의 과정은 새로운 사용자에 대해 새 계정을 만드는 과정과 유사하다. 그렇다면 다른 사용자와 admin은 어떻게 구분할까?
+  - 인증서에 그룹 정보를 추가할 수 있다.
+  - 쿠버네티스의 system masters 그룹이 관리자 권한을 가진다.
+  - CSR 생성 시 아래와 같이 그룹을 명시한다.
+    ```bash
+    openssl req -new key admin.key -subj "/CN=kube-admin/O=system:masters" -out admin.csr
+    ```
+
+### Server Certificate
+
+- 인증서 생성 과정은 위와 동일하다.
+
+**ETCD Server Certificate**
+
+- etcd 서버는 고가용성을 위해 클러스터 내 여러 서버에 배포될 수 있다.
+  - 각 멤버들 간의 통신을 보호하기 위해 추가적인 피어 인증서를 생성해야 한다.
+  - 인증서가 한 번 생성되면 etcd 서버를 시작할 때, 이를 명시해주어야 한다.
+
+**kube-apiserver Certificate**
+
+- kube-apiserver는 많은 요청이 들어오고, 많은 운영이 kube-apiserver를 통해 이루어지는 만큼 별칭이 많다.
+- 별칭은 아래의 방법으로 지정할 수 있다.
+  - openssl.cnf를 생성한다.
+  - 이후, alt_names에 대체 DNS 또는 IP를 지정한다.
+- 이후, 인증서에 서명한다.
+  ```bash
+  openssl x509 -req -in apiserver.csr -CA ca.crt -CAkey ca.key -out apiserver.crt
+  ```
+
+**kubelet Certificate**
+
+- 노드마다 kubelet이 존재하기 때문에, 각 노드에 인증서가 필요하다. 이름은 노드에 따라서 정해진다.
+- 인증서를 생성하고, kubelet-config 파일에 해당 정보를 알려준다. 이 과정은 각 노드에서 수행되어야 한다.
+- kubelet은 클라이언트로서 kube-apiserver와 통신하기 위한 클라이언트 인증서도 필요하다.
+  - kube-apiserver가 어떤 노드인지 알 수 있도록 이름이 지정된다.
+  - 노드는 시스템 구성 요소이므로 system:node:node01과 같이 지정된다.
+  - kube-apiserver가 올바른 권한을 주기 위해 노드들은 SYSTEM:NODES라는 그룹에 추가된다.
