@@ -209,3 +209,107 @@
   ```
 - kubeconfig 파일 내 컨텍스트 구성에서 namespace 필드를 명시할 수 있다. 해당 컨텍스트로 전환 시 지정한 네임스페이스로 변경된다.
 - kubeconfig 파일에서 certificate-authority 필드로 인증서 경로를 지정할 수 있다. 또는 certificate-authority-data 필드에 인코딩 된 인증서를 직접 명시할 수 있다.
+
+## Authorization
+
+- 인증된 사용자가 클러스터에서 무엇을 할 수 있는가를 결정하는 영역이다.
+- `--authorization-mode` 옵션에서 변경할 수 있다.
+  - 명시된 순서대로 액세스 권한을 확인한다.
+
+### Node Authorizer
+
+- system:node 이름을 가진 사용자로부터의 요청은 노드 인가를 통해 권한이 부여된다.
+
+### ABAC (Attribute Based Access Control)
+
+- 사용자 또는 사용자 그룹을 권한 집합과 연결하는 역할을 한다.
+- 정책 파일을 생성해서 지정할 수 있다. json 형식으로 지정한 파일은 다음과 같다:
+  ```json
+  {"apiVersion": "abac.authorization.kubernetes.io/v1beta1", "kind": "Policy", "spec": {"user": "alice", "namespace": "*", "resource": "*", "apiGroup": "*"}}
+  ```
+- 이는 사용자마다 위와 같은 과정을 거쳐야 하므로 불편함이 있다. 이를 조금 더 쉽게 할 수 있는 방법이 바로 RBAC이다.
+
+### RBAC (Role Based Access Control)
+
+- 사용자 또는 사용자 그룹을 권한 집합과 연결하며 ABAC보다 쉽게 제어할 수 있다.
+- 특정 권한을 생성하고 사용자를 연결하는 방식이다.
+  - Developers라는 그룹을 생성하고 해당 그룹에 view pods, create pods, delete pods, create ConfigMap와 같이 개발에 필요한 권한을 부여한다.
+
+**Create Role**
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: developer
+rules:
+  - apiGroups: [ "" ]
+    resources: [ "pods" ]
+    verbs: [ "list", "get", "create", "update", "delete" ]
+    resourceNames: [ "blue", "orange" ]
+  - apiGroups: [ "" ]
+    resources: [ "ConfigMap" ]
+    verbs: [ "create" ]
+```
+
+- resourceNames 필드를 추가하여 특정 리소스에만 역할을 적용할 수 있다.
+- 아래 명령어를 통해 역할을 생성할 수 있다.
+  ```bash
+  kubectl create -f developer-role.yaml
+  ```
+
+**Create RoleBinding**
+
+- 해당 권한이 필요한 사용자를 그룹에 직접 매핑시켜주면 된다.
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: devuser-developer-binding
+subjects:
+  - kind: User
+    name: dev-user
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: developer
+  apiGroup: rbac.authorization.k8s.io
+```
+
+- 아래 명령어를 통해 롤바인딩을 생성할 수 있다. 이는 기본 네임스페이스에 생성된다. 네임스페이스를 변경하려면 yaml 파일에서 네임스페이스를 지정해야 한다.
+  ```bash
+  kubectl create -f devuser-developer-binding.yaml
+  ```
+
+**View RBAC**
+
+- 아래 명령어를 통해 역할을 조회할 수 있다.
+  ```bash
+  kubectl get roles
+  ```
+- 아래 명령어를 통해 롤바인딩을 조회할 수 있다.
+  ```bash
+  kubectl get rolebindings
+  ```
+- 아래 명령어를 통해 해당 역할에 대한 정보를 살펴볼 수 있다.
+  ```bash
+  kubectl describe role developer
+  ```
+- 아래 명령어를 통해 롤바인딩에 대한 정보를 살펴볼 수 있다.
+  ```bash
+  kubectl describe rolebinding devuser-developer-binding
+  ```
+- 아래 명령어를 통해 사용자가 클러스터의 특정 리소스에 대한 액세스 권한이 있는지 확인할 수 있다. 출력은 yes 또는 no이다. 또한 `--as` 옵션을 통해 특정 사용자에 대한 권한 확인도 가능하다.
+  ```bash
+  kubectl auth can-i create developments
+  ```
+
+### Webhook
+
+- open policy agent와 같이 어드미션 컨트롤과 인가를 돕는 서드파티를 사용한다.
+  - 쿠버네티스가 open policy agent에 권한 체크 요청을 하도록 할 수 있다.
+
+## AlwaysAllow, AlwaysDeny
+
+- 권한 체크 없이 모두 수용 또는 거절한다.
