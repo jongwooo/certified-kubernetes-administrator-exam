@@ -82,7 +82,7 @@ wget -q --https-only \
 "https://github.com/etcd-io/etcd/releases/download/v3.5.11/etcd-v3.5.11-linux-amd64.tar.gz"
 ```
 
-- `--advertise-client-urls` 옵션은 kube-apiserver에서 etcd 클러스터에 접근하기 위해 설정해주어야 하는 필드이다.
+- `--advertise-client-urls` 옵션은 kube-apiserver에서 etcd 클러스터에 접근하기 위해 설정해주어야 한다.
 
 ### kubeadm으로 설치할 경우
 
@@ -105,7 +105,7 @@ kubectl get pods -n kube-system
 
 ### ETCD in HA Environment
 
-- `etcd.service` 필드의 `--initial-cluster` 항목에 etcd server의 경로를 입력한다.
+- etcd.service의 `--initial-cluster` 옵션에 etcd 서버의 경로를 입력한다.
 
 ## Kube API Server
 

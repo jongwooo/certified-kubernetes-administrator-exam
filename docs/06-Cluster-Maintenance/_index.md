@@ -158,7 +158,7 @@
     snapshot restore snapshot.db \
     --data-dir /var/lib/etcd-from-backup
   ```
-- etcd.service의 `--data-dir` 필드를 수정하여 새로운 데이터 디렉토리를 사용하도록 한다.
+- etcd.service의 `--data-dir` 옵션을 수정하여 새로운 데이터 디렉토리를 사용하도록 한다.
 - 이후 etcd를 재시동하고 kube-apiserver를 실행한다.
   ```bash
   systemctl daemon-reload
