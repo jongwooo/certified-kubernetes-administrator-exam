@@ -142,3 +142,32 @@
   ```bash
   openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text -noout
   ```
+
+## Certificates API
+
+- 팀에 새로운 인원이 합류하거나 인증서의 유효기간이 만료되었을 경우 새로운 인증서를 발급받아야 하는데 이는 admin 권한을 가진 인원을 통해 이루어진다.
+  1. 발급받고자 하는 인원의 개인키를 생성하고 admin에게 CSR을 보낸다.
+  2. admin은 받은 CSR로 CA 서버를 통해 인증서를 생성한다.
+  3. 관리자는 생성한 인증서를 요청자에게 돌려줌으로서 새로운 접근 권한이 생긴다.
+- CA 서버는 쿠버네티스의 구성 중 어디에 있는걸까?
+- CA는 사실상 직접 생성한 키, 인증서 파일 쌍에 불과하다. 해당 파일을 보호하기 위해 안전한 서버에 위치하도록 하고, 이를 CA 서버라고 칭한다.
+- 현재는 마스터 노드에 인증서가 위치한다. 따라서 마스터 노드 또한 CA 서버이며, kubeadm 또한 파일 쌍인 CA를 생성하고. 마스터 노드 자체에 저장한다.
+- 팀이 성장하고 많은 인원이 합류하면 더 나은 자동화된 방법이 필요하다.
+- 쿠버네티스에는 인증서 API를 사용하여 이를 수행할 수 있는 Certificates API가 내장되어 있다.
+- 이 API를 사용하면 API 호출을 통해서 쿠버네티스에 직접 CSR을 보낼 수 있다. 위의 예시와 동일한 요청을 보낼 경우 Certificates API를 호출하면 다음과 같이 자동화가 된다:
+  - CertificateSigningRequest 오브젝트를 생성한다.
+    - admin이 직접 로그온하여 서명하지 않는다.
+  - CSR이 생성되면 클러스터 관리자가 모든 인증서 서명 요청을 확인할 수 있다. 아래 명령어를 통해 인증서 서명 요청을 조회할 수 있다.
+    ```bash
+    kubectl get csr
+    ```
+  - 아래 명령어를 통해 인증서 서명을 승인할 수 있다.
+    ```bash
+    kubeclt certificate approve <user>
+    ```
+  - 생성된 인증서는 yaml 파일에서 확인할 수 있다. 이때 base64로 인코딩된 인증서를 디코딩해야 한다.
+    ```bash
+    kubeclt get csr <user> -o yaml
+    ```
+- 쿠버네티스에서는 이러한 인증 관련 작업 수행을 어디서 할까?
+  - kube-controller-manager 내 CSR-APPROVING, CSR-SIGNING이 이러한 태스크를 담당한다.
