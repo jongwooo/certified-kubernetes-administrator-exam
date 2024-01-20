@@ -313,3 +313,54 @@ roleRef:
 ## AlwaysAllow, AlwaysDeny
 
 - 권한 체크 없이 모두 수용 또는 거절한다.
+
+## Cluster Roles
+
+- 클러스터롤은 네임스페이스가 없는 리소스이다. 쿠버네티스 오브젝트는 항상 네임스페이스가 지정되거나 지정되지 않아야 하기 때문에 리소스의 이름을 구분한다.
+- 클러스터 범위의 리소스에 대한 역할을 제외하고는 역할과 동일하다.
+- 클러스터롤은 전체 네임스페이스에 적용되기 때문에 네임스페이스를 별도로 명시하지 않는다. 그 외에는 역할과 유사하다.
+- nonResourceURLs 필드를 명시하여 리소스가 아닌 URL 형식으로 룰을 설정하는 것도 가능하다.
+
+**Create ClusterRole**
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-administrator
+rules:
+  - apiGroups: [ "" ]
+    resources: [ "nodes" ]
+    verbs: [ "list", "get", "create", "delete" ]
+```
+
+- 아래 명령어를 통해 클러스터롤을 생성할 수 있다.
+  ```bash
+  kubectl create -f cluster-admin-role.yaml
+  ```
+- 아래 명령어를 통해 클러스터롤을 조회할 수 있다.
+  ```bash
+  kubectl get clusterroles
+  ```
+
+**Create ClusterRoleBinding**
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cluster-admin-role-binding
+subjects:
+  - kind: User
+    name: cluster-admin
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: cluster-administrator
+  apiGroup: rbac.authorization.k8s.io
+```
+
+- 아래 명령어를 통해 클러스터롤바인딩을 생성할 수 있다.
+  ```bash
+  kubectl create -f cluster-admin-role-binding.yaml
+  ```
