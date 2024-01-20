@@ -171,3 +171,41 @@
     ```
 - 쿠버네티스에서는 이러한 인증 관련 작업 수행을 어디서 할까?
   - kube-controller-manager 내 CSR-APPROVING, CSR-SIGNING이 이러한 태스크를 담당한다.
+
+## KubeConfig
+
+- kube-apiserver에서 클라이언트가 자신을 증명하는 방법으로는 아래와 같이 두 가지 방법이 있다.
+  ```bash
+  curl https://my-kube-playground:6443/api/v1/pods \
+    --key admin.key
+    --cert admin.cert
+    --cacert ca.crt
+  ```
+  ```bash
+  kubectl get pods \
+    --server https://my-kube-playground:6443
+    --client-key admin.key \
+    --client-certificate admin.crt \
+    --certificate-authority ca.crt
+  ```
+- 옵션을 모두 타이핑하는 것은 귀찮기 때문에, $HOME/.kube/config라는 별도의 파일을 만들어 관리한다.
+- `--kubeconfig` 옵션을 통해 경로를 지정할 수 있다.
+
+![KubeConfig](./kubeconfig.png)
+
+- kubeconfig 파일은 세 가지 영역으로 나뉜다:
+  - Clusters: 액세스가 필요한 다양한 쿠버네티스 클러스터이다. 여러 개의 클러스터를 다양한 개발 환경, 다른 조직에서 구성 중일 때를 가정해보면 된다.
+  - Users: 해당 클러스터에 접근 가능한 사용자 계정으로 각 클러스터마다 다른 권한을 가진다.
+  - Contexts: 어떤 사용자 계정이 어떤 클러스터에 액세스 가능한지 정의한다.
+- 클러스터와 사용자를 여러 개 지정할 수 있으며, 컨텍스트로 묶을 수 있다.
+- current-context 필드를 통해 기본 컨텍스트를 지정할 수 있다.
+- 아래의 명령어를 통해 kubeconfig 구성을 살펴볼 수 있다.
+  ```bash
+  kubectl config view
+  ```
+- 아래의 명령어를 통해 컨텍스트를 변경할 수 있다.
+  ```bash
+  kubectl config use-context prod-user@production
+  ```
+- kubeconfig 파일 내 컨텍스트 구성에서 namespace 필드를 명시할 수 있다. 해당 컨텍스트로 전환 시 지정한 네임스페이스로 변경된다.
+- kubeconfig 파일에서 certificate-authority 필드로 인증서 경로를 지정할 수 있다. 또는 certificate-authority-data 필드에 인코딩 된 인증서를 직접 명시할 수 있다.
