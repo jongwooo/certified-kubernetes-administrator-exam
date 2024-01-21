@@ -406,3 +406,37 @@ roleRef:
     --docker-email=
   ```
 - 파드 생성 시, imagePullSecrets 필드에 생성한 시크릿을 명시한다.
+
+## Security Contexts
+
+- 컨테이너 또는 파드 수준에서 보안 설정을 적용할 수 있다.
+- 파드 수준에서 구성 시 설정이 파드 내의 모든 컨테이너에 적용된다.
+  ```yaml
+  apiVersion: v1
+  kind: Pod
+  metadata:
+    name: web-pod
+  spec:
+    securityContext:
+      runAsUser: 1000
+    containers:
+      - name: ubuntu
+        image: ubuntu
+        command: [ "sleep", "3600" ]
+  ```
+- 컨테이너 수준에서 구성하려면 다음과 같이 작성한다. 파드 수준의 구성과 달리, 컨테이너 수준에서만 지원되는 capabilities 필드를 구성할 수 있다.
+  ```yaml
+  apiVersion: v1
+  kind: Pod
+  metadata:
+    name: web-pod
+  spec:
+    containers:
+      - name: ubuntu
+        image: ubuntu
+        command: [ "sleep", "3600" ]
+        securityContext:
+          runAsUser: 1000
+          capabilities:
+            add: [ "MAC_ADMIN" ]
+  ```
