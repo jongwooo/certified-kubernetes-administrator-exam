@@ -384,11 +384,25 @@ roleRef:
   ```bash
   kubectl describe secret dashboard-sa-token-kbbdm
   ```
-- 각 네임스페이스는 기본 (default) 서비스 어카운트가 자동 생성된다. 파드가 생성되면 기본 서비스 어카운트와 그 토큰이 자동으로 파드의 볼륨으로 마운트된다 아래 명령어를 통해 파드 내 마운트된 것을 확인할 수  있다.
+- 각 네임스페이스는 기본 (default) 서비스 어카운트가 자동 생성된다. 파드가 생성되면 기본 서비스 어카운트와 그 토큰이 자동으로 파드의 볼륨으로 마운트된다 아래 명령어를 통해 파드 내 마운트된 것을 확인할
+  수 있다.
   ```bash
   kubectl exec -it my-kuberenetes-dashboard cat /var/run/secrets/kubernetes.io/serviceaccount/token
   ```
 - 파드 생성 시, 다른 서비스 어카운트를 사용하고 싶다면 spec.serviceAccountName 필드에 명시하면 된다. 존재하는 파드에 변경은 불가능하며, 변경 시에는 파드를 삭제 후 재생성한다.
 - 디플로이먼트는 존재하더라도 변경 가능하며, 이 경우 자동으로 새로운 롤아웃 디플로이먼트를 생성한다.
 - spec.automountServiceAccountToken 필드를 false로 명시하여 자동 마운트되는 것을 방지할 수 있다.
-- 쿠버네티스 v1.29을 포함한 최신 버전에서는, API 자격 증명들은 TokenRequest API를 사용하여 직접 얻을 수 있으며, 프로젝티드 볼륨을 사용하여 파드에 마운트할 수 있다. 이 방법으로 취득한 토큰은 시간 제한이 있으며, 마운트 되었던 파드가 삭제되는 경우 자동으로 만료된다.
+- 쿠버네티스 v1.29을 포함한 최신 버전에서는, API 자격 증명들은 TokenRequest API를 사용하여 직접 얻을 수 있으며, 프로젝티드 볼륨을 사용하여 파드에 마운트할 수 있다. 이 방법으로 취득한
+  토큰은 시간 제한이 있으며, 마운트 되었던 파드가 삭제되는 경우 자동으로 만료된다.
+
+## Image Security
+
+- 아래 명령어를 통해 자격 증명을 가진 docker-registry 타입의 시크릿을 생성한다.
+  ```bash
+  kubectl create secret docker-registry regcred \
+    --docker-server= \
+    --docker-username= \
+    --docker-password= \
+    --docker-email=
+  ```
+- 파드 생성 시, imagePullSecrets 필드에 생성한 시크릿을 명시한다.
