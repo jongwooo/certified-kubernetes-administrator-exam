@@ -474,3 +474,37 @@ spec:
   ```bash
   kubectl create -f policy-definition.yaml
   ```
+
+## Developing Network Policies
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: db-policy
+spec:
+  podSelector:
+    matchLabels:
+      role: db
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              name: api-pod
+        - namespaceSelector:
+            matchLabels:
+              name: prod
+        - ipBlock:
+            cidr: 192.168.5.10/32
+      ports:
+        - protocol: TCP
+          port: 3306
+```
+
+- 클러스터에 레이블은 같지만 네임스페이스가 다른 여러 파드가 있는 경우는 어떻게 될까? 예를 들어 개발, 테스트 및 제품 환경의 네임스페이스가 서로 다르고, 이러한 각 환경에 동일한 레이블을 가진 파드가 있다고
+  가정해보자.
+- from.namespaceSelector 필드를 통해 네임스페이스를 명시할 수 있다.
+- from.ipBlock 필드를 명시하여 허용할 수 있는 IP 주소 범위를 지정할 수 있다.
+- podSelector, namespaceSelector, ipBlock 필드 앞에 각각 -를 추가하면 별개의 규칙이 된다.
