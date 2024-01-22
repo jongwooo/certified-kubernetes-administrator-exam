@@ -440,3 +440,37 @@ roleRef:
           capabilities:
             add: [ "MAC_ADMIN" ]
   ```
+
+## Network Policies
+
+- 쿠버네티스는 기본적으로 모든 파드에서 다른 파드 또는 서비스로 트래픽을 허용하는 All Allow 규칙으로 구성된다.
+- 네트워크 폴리시를 사용하여 특정 통신만 허용하도록 할 수 있다.
+- 즉, 파드 내부로 들어오는 인그레스 트래픽과 외부로 나가는 이그레스 트래픽을 제한할 수 있다.
+
+**Network Policy Creation**
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: db-policy
+spec:
+  podSelector:
+    matchLabels:
+      role: db
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              name: api-pod
+      ports:
+        - protocol: TCP
+          port: 3306
+```
+
+- 아래 명령어를 통해 네트워크 폴리시를 생성할 수 있다.
+  ```bash
+  kubectl create -f policy-definition.yaml
+  ```
