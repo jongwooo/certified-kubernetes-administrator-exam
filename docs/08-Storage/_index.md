@@ -66,3 +66,69 @@ spec:
   ```bash
   kubectl get persistentvolume
   ```
+
+## Persistent Volume Claims
+
+- 퍼시스턴트 볼륨과 퍼시스턴트 볼륨 클레임은 쿠버네티스 네임스페이스에서 다른 오브젝트이다.
+- 관리자는 퍼시스턴트 볼륨을 생성하고, 사용자는 스토리지에 사용할 퍼시스턴트 볼륨 클레임을 생성한다.
+- 퍼시스턴트 볼륨 클레임이 생성되면 쿠버네티스는 퍼시스턴트 볼륨을 생성할 때의 구성에 따라 퍼시스턴트 볼륨과 퍼시스턴트 볼륨 클레임을 바인딩한다. 이때, 모든 퍼시스턴트 볼륨 클레임은 하나의 퍼시스턴트 볼륨과
+  마운트된다.
+- 바인딩 동안 쿠버네티스는 클레임에 의해 요청되는 대로 충분한 용량을 가진 퍼시스턴트 볼륨이나 다른 기타 요청 속성(Access Mode, Volume Modes, Storage Class, Selector,
+  etc)을 찾으려고 한다.
+- 여러 개의 퍼시스턴트 볼륨 구성에서 매칭되는 클레임이 하나라면 레이블과 셀렉터를 통해 매칭시킬 수 있다.
+- 퍼시스턴트 볼륨의 용량은 큰데, 퍼시스턴트 볼륨 클레임의 용량이 작다면 바인딩 될 수 있다. 하지만 이 둘은 일대일 관계이므로 다른 클레임이 퍼시스턴트 볼륨의 남은 용량을 사용할 수는 없다.
+- 사용 가능한 볼륨이 없는 경우, 클러스터에서 새 볼륨을 사용할 수 있게 될 때까지 Pending 상태가 된다.
+
+### Create Persistent Volume Claim
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: myclaim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi
+```
+
+- 아래 명령어를 통해 퍼시스턴트 볼륨 클레임을 생성할 수 있다.
+  ```bash
+  kubectl create -f pvc-definition.yaml
+  ```
+- 아래 명령어를 통해 퍼시스턴트 볼륨 클레임 목록을 조회할 수 있다.
+  ```bash
+  kubectl get persistentvolumeclaim
+  ```
+
+### Delete Persistent Volume Claim
+
+- persistentVolumeReclaimPolicy 필드를 통해 퍼시스턴트 볼륨 클레임 삭제 이후 퍼시스턴트 볼륨을 관리할 수 있다.
+  - Retain: 기본 설정으로, 관리자가 삭제하기 전까지 퍼시스턴트 볼륨은 남아 있다.
+  - Delete: 퍼시스턴트 볼륨 클레임이 삭제되면 곧 퍼시스턴트 볼륨도 삭제된다.
+  - Recycle: 다른 클레임이 사용할 수 있도록 퍼시스턴트 볼륨 내 데이터만 삭제한다.
+
+### Using PVCs in Pods
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+    - name: myfrontend
+      image: nginx
+      volumeMounts:
+        - mountPath: "/var/www/html"
+          name: mypd
+  volumes:
+    - name: mypd
+      persistentVolumeClaim:
+        claimName: myclaim
+```
+
+- 퍼시스턴트 볼륨 클레임이 생성되면, 파드 매니페스트 파일의 volumes.persistentVolumeClaim 필드를 명시하여 퍼시스턴트 볼륨 클레임을 지정할 수 있다. 이는 레플리카셋이나 디플로이먼트에서도
+  동일하다.
