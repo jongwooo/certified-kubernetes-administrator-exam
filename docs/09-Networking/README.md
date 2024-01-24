@@ -64,3 +64,20 @@
 - 서비스가 생성되면 쿠버네티스 DNS 서버는 서비스를 위한 레코드를 생성하고, 서비스 이름과 IP 주소를 매핑한다. 이로 인해 클러스터 내에서 어느 파드에서든 서비스 이름을 통해 접근할 수 있다.
 - 서비스의 네임스페이스가 다르면 servicename.namespace으로 도메인이 생성된다.
 - 파드는 IP 주소의 온점 대신 대시로 변환되어 pod-ip-with-dash.namespace.svc.cluster.local과 같이 도메인이 생성된다.
+
+## CoreDNS in Kubernetes
+
+- 쿠버네티스 v1.12 이후 권장되는 DNS 서버는 CoreDNS이다.
+- 아래 명령어를 통해 CoreDNS의 구성을 확인할 수 있다.
+  ```bash
+  cat /etc/coredns/Corefile
+  ```
+- 해당 구성 파일은 파드에 컨피그맵으로 전달된다. 따라서 옵션 값을 변경하려면 컨피그맵을 수정하면 된다.
+- CoreDNS 파드도 다른 파드의 요청을 처리하기 위해 kube-system 네임스페이스에 kube-dns라는 서비스를 생성한다.
+- 각 파드는 처음 생성될 때 /etc/resolv.conf 파일에 kube-dns의 서비스 IP 주소가 네임서버로 등록ㅎ되어 있다.
+- 이러한 사전 작업은 전부 kubelet이 담당한다.
+- 그러면 web-service라는 이름만 가지고 FQDN을 어떻게 찾는 것일까?
+- 아래 세 개의 도메인을 search로 추가해두었기 때문에 서비스의 경우 서비스 이름만으로도 FQDN을 만들 수 있다.
+  - default.svc.cluster.local
+  - svc.cluster.local
+  - cluster.local
