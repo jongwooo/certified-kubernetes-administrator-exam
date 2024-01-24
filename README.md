@@ -10,3 +10,4 @@
 - [06-Cluster-Maintenance](docs/06-Cluster-Maintenance/_index.md)
 - [07-Security](docs/07-Security/_index.md)
 - [08-Storage](docs/08-Storage/_index.md)
+- [09-Networking](docs/09-Networking/_index.md)
