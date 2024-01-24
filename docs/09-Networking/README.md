@@ -57,3 +57,10 @@
   ```bash
   cat /var/log/kube-proxy.log
   ```
+
+## DNS in Kubernetes
+
+- 쿠버네티스는 기본적으로 내장 DNS 서버를 배포한다.
+- 서비스가 생성되면 쿠버네티스 DNS 서버는 서비스를 위한 레코드를 생성하고, 서비스 이름과 IP 주소를 매핑한다. 이로 인해 클러스터 내에서 어느 파드에서든 서비스 이름을 통해 접근할 수 있다.
+- 서비스의 네임스페이스가 다르면 servicename.namespace으로 도메인이 생성된다.
+- 파드는 IP 주소의 온점 대신 대시로 변환되어 pod-ip-with-dash.namespace.svc.cluster.local과 같이 도메인이 생성된다.
