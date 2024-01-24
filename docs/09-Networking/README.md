@@ -20,3 +20,11 @@
   ```bash
   ./net-script.sh add <container> <namespace>
   ```
+
+## CNI in Kubernetes
+
+- CNI 플러그인은 클러스터의 각 노드에 있는 kubelet.service에서 구성된다.
+- 아래 명령어를 통해 설정된 네트워크 플러그인을 확인할 수 있다. `—cni-conf-dir`, `—cni-bin-dir`, `—network-plugin` 옵션을 살펴보면 된다.
+  ```bash
+  ps -aux | grep kubelet
+  ```
