@@ -28,3 +28,32 @@
   ```bash
   ps -aux | grep kubelet
   ```
+
+## Service Networking
+
+- 서비스는 어떻게 IP를 얻으며 어떻게 클러스터 내의 모든 노드에서 IP 주소를 사용할 수 있는 것일까? 또한 각 노드의 포트를 통해 외부 사용자가 서비스를 이용할 수 있는 방법은 무엇일까?
+- kube-apiserver를 통해 새로운 파드가 생성되고, 그 파드가 노드에 생성되는 등 kubelet은 클러스터 내의 모든 변화를 감시하고 있다. 이후 CNI 플러그인을 호출하여 해당 파드에 대한 네트워킹을
+  구성한다.
+- 마찬가지로 각 노드에서는 kube-proxy를 실행한다. 새 서비스가 생성될 때마다 실행된다.
+- 서비스는 클러스터 차원의 개념이며, 클러스터의 모든 노드에 존재한다.
+- 실제로 서비스의 IP를 수신하는 서버나 서비스는 없다. 파드에는 컨테이너가 있고, 컨테이너에는 인터페이스가 있는 네임스페이스가 있으며, IP는 서비스가 있는 인터페이스에 할당되어 있다.
+- 서비스에 대한 프로세스, 네임스페이스, 인터페이스는 없다. 이것은 가상의 오브젝트일 뿐이다. 그렇다면 더더욱 궁금한 것은 어떻게 IP 주소를 얻고 서비스를 통해 파드의 애플리케이션에 접근할 수 있는걸까?
+- 서비스 오브젝트가 생성되면 미리 정의된 범위에서 IP 주소가 할당된다. 각 노드에서 실행 중인 kube-proxy는 해당 IP 주소를 가져오고, 클러스터의 각 노드에 forwarding rules(이 IP로
+  들어오는 트래픽을 특정 IP로 보내는 규칙)를 만든다.
+- kube-proxy는 userspace, ipvs, iptables라는 다양한 방법을 지원하며 기본 옵션은 iptables이다. 이는 다음과 같이 설정할 수 있다:
+  ```bash
+  kube-proxy —proxy-mode [ userspace | iptables | ipvs ]
+  ```
+- 생성한 파드를 조회해보면 IP 주소를 확인할 수 있다. 그리고 생성한 서비스를 조회하면 기본적으로 ClusterIP 타입으로 지정되어 있으며, 이에 해당하는 IP 주소 또한 확인할 수 있다. 이러한 주소는
+  kube-api-server의 `—service-cluster-ip-range` 옵션으로 정해진다.
+  ```bash
+  kube-api-server —service-cluster-ip-range ipNet
+  ```
+- 아래 명령어를 통해 kube-proxy에 의해 생성된 규칙을 확인할 수 있다.
+  ```bash
+  iptables -L -t nat | grep db-service
+  ```
+- 아래의 명령어를 통해 로그를 확인할 수 있다. 로그 확인시 어떤 옵션으로 규칙이 생성되었으며, 어떤 서비스가 생성되었고, 어떤 IP에 할당되었는지도 확인이 가능하다.
+  ```bash
+  cat /var/log/kube-proxy.log
+  ```
