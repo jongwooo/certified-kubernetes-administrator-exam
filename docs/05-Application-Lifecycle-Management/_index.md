@@ -1,5 +1,7 @@
 # Application Lifecycle Management
 
+[메인으로 돌아가기](../../README.md)
+
 ## Rolling Updates and Rollbacks
 
 - 디플로이먼트가 처음 생성되면, 롤아웃이 트리거된다.
