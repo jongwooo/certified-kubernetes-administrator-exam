@@ -13,8 +13,8 @@
 
 ### 필요 사전 지식
 
-- containers, applications, yaml files, architecture, networking, load balancing, a variety of monitoring tools, auto
-  scaling, configuration, security storage
+- containers, applications, yaml files, architecture, networking, load balancing, a variety of monitoring tools,
+  auto-scaling, configuration, security storage
 
 ### Kubernetes for the Absolute Beginners
 
