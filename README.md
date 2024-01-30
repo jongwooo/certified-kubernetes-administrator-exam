@@ -1,4 +1,4 @@
-# Certified Kubernetes Administrator (CKA)
+# Certified Kubernetes Administrator (CKA) - v1.28
 
 Resources to prepare for [Certified Kubernetes Administrator](https://www.cncf.io/training/certification/cka/) exam.
 
