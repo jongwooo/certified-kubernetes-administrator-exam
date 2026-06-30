@@ -100,7 +100,7 @@ spec:
 
 - 아래 명령어를 통해 노드에 테인트를 적용할 수 있다.
   ```bash
-  kubectl taint nodes node01 app=blue:taint-effect
+  kubectl taint nodes node01 app=blue:taint-effect
   ```
 - 아래 명령어를 통해 테인트를 확인할 수 있다.
   ```bash
